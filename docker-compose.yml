@@ -1,0 +1,88 @@
+version: '3.5'
+
+services:
+
+    parcellaire-postgis:
+        container_name: parcellaire-express-postgis
+        build:
+            context: ./postgis
+            args:
+                postgres_version: 13
+                postgis_version: 3
+        environment:
+            - POSTGRES_DB=parcellaire-express
+            - POSTGRES_USER=parcellaire
+            - POSTGRES_PASSWORD=password
+            - POSTGRES_SCHEMA=edition211
+        # Ouverture de port pour test si nécessaire
+        #ports:
+            #- "5432:5432"
+        volumes:
+            - postgis-data:/var/lib/postgresql/data
+            - ./scripts:/tmp/scripts
+            - ./parcellaire-express:/tmp/parcellaire-express
+        # Options de configuration issues de PGTune (https://pgtune.leopard.in.ua)
+        # Valeurs par défaut pour une instance Hetzner CPX21
+        command:
+            - "postgres"
+            - "-c"
+            - "max_connections=100"
+            - "-c"
+            - "shared_buffers=1GB"
+            - "-c"
+            - "effective_cache_size=3GB"
+            - "-c"
+            - "maintenance_work_mem=256MB"
+            - "-c"
+            - "checkpoint_completion_target=0.9"
+            - "-c"
+            - "wal_buffers=16MB"
+            - "-c"
+            - "default_statistics_target=100"
+            - "-c"
+            - "random_page_cost=1.1"
+            - "-c"
+            - "effective_io_concurrency=200"
+            - "-c"
+            - "work_mem=2621kB"
+            - "-c"
+            - "min_wal_size=1GB"
+            - "-c"
+            - "max_wal_size=4GB"
+            - "-c"
+            - "max_worker_processes=3"
+            - "-c"
+            - "max_parallel_workers_per_gather=2"
+            - "-c"
+            - "max_parallel_workers=3"
+            - "-c"
+            - "max_parallel_maintenance_workers=2"
+        shm_size: 2g
+
+    # Accès à la base via un front web pour contrôle si nécessaire
+    parcellaire-adminer:
+        container_name: parcellaire-express-adminer
+        image: adminer
+        ports:
+            - "8080:8080"
+        environment: 
+            - ADMINER_DEFAULT_SERVER=parcellaire-postgis
+            - ADMINER_DESIGN=hydra
+
+    parcellaire-api:
+        container_name: parcellaire-express-api
+        build:
+            context: ./go
+        environment:
+            - APP_DB_USERNAME=parcellaire
+            - APP_DB_PASSWORD=password
+            - APP_DB_NAME=parcellaire-express
+            - APP_DB_HOST=parcellaire-postgis
+            - APP_DB_SCHEMA=edition211
+            - APP_PORT=8010
+        ports:
+            - "8010:8010"
+
+volumes:
+    postgis-data:
+        name: postgis-data
