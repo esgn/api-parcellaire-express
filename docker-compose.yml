@@ -18,7 +18,7 @@ services:
         #ports:
             #- "5432:5432"
         volumes:
-            - postgis-data:/var/lib/postgresql/data
+            - parcellaire-postgis-data:/var/lib/postgresql/data
             - ./scripts:/tmp/scripts
             - ./parcellaire-express:/tmp/parcellaire-express
         # Options de configuration issues de PGTune (https://pgtune.leopard.in.ua)
@@ -63,8 +63,9 @@ services:
     parcellaire-adminer:
         container_name: parcellaire-express-adminer
         image: adminer
-        ports:
-            - "8080:8080"
+        # Ouverture de port pour test si nécessaire
+        #ports:
+        #    - "8080:8080"
         environment: 
             - ADMINER_DEFAULT_SERVER=parcellaire-postgis
             - ADMINER_DESIGN=hydra
@@ -84,5 +85,5 @@ services:
             - "8010:8010"
 
 volumes:
-    postgis-data:
-        name: postgis-data
+    parcellaire-postgis-data:
+        name: parcellaire-postgis-data
