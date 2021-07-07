@@ -27,17 +27,18 @@ def download_url(url):
         return filename + " téléchargement en échec"
     return filename + " téléchargement réussi"
 
-
 # Téléchargement des archives
 
 url = "https://files.opendatarchives.fr/professionnels.ign.fr/parcellaire-express/PCI-par-DEPT_2021-02/"
 out_dir = "parcellaire-express"
-
 regex = re.compile(r'.*\.7z$')
 
 all_links = extract_all_links(url)
 all_links = [i for i in all_links if regex.match(i)]
 all_links = [url+x for x in all_links]
+
+# A décommenter pour ne charger qu'un seul département en vue de tests.
+#all_links = all_links[:1]
 
 if os.path.exists(out_dir):
     shutil.rmtree(out_dir)

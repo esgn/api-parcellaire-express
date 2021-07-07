@@ -1,3 +1,0 @@
--- Replace this with result from https://pgtune.leopard.in.ua/#/
-ALTER SYSTEM SET max_connections = 1000;
-ALTER SYSTEM RESET shared_buffers;
