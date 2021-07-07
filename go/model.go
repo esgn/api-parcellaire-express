@@ -22,20 +22,21 @@ type parcelle struct {
 }
 
 func getGeoJSON(db *sql.DB, query string, args ...interface{}) (*geojson.FeatureCollection, error) {
+
 	rows, err := db.Query(query, args...)
+
 	if err != nil {
+		log.Println(err.Error())
 		return nil, err
 	}
-	defer func(rows *sql.Rows) {
-		if err := rows.Close(); err != nil {
-			log.Println("Cannot close request")
-		}
-	}(rows)
+
+	defer rows.Close()
 
 	fc := geojson.NewFeatureCollection()
 	for rows.Next() {
 		var a parcelle
 		if err := rows.Scan(&a.idu, &a.numero, &a.feuille, &a.section, &a.nom_com, &a.code_com, &a.com_abs, &a.code_arr, &a.geometry); err != nil {
+			log.Println(err.Error())
 			return nil, err
 		}
 		f := geojson.NewFeature(a.geometry)
@@ -48,6 +49,17 @@ func getGeoJSON(db *sql.DB, query string, args ...interface{}) (*geojson.Feature
 		f.SetProperty("com_abs", a.com_abs)
 		f.SetProperty("code_arr", a.code_arr)
 		fc.AddFeature(f)
+	}
+
+	rerr := rows.Close()
+	if rerr != nil {
+		log.Println(rerr.Error())
+		return nil, rerr
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Println(err.Error())
+		return nil, err
 	}
 
 	return fc, nil

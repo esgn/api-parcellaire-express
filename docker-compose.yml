@@ -1,4 +1,4 @@
-version: '3.5'
+version: '3.8'
 
 services:
 
@@ -7,8 +7,8 @@ services:
         build:
             context: ./postgis
             args:
-                postgres_version: 13
-                postgis_version: 3
+                - postgres_version=13
+                - postgis_version=3
         environment:
             - POSTGRES_DB=parcellaire-express
             - POSTGRES_USER=parcellaire
@@ -60,15 +60,14 @@ services:
         shm_size: 2g
 
     # Accès à la base via un front web pour contrôle si nécessaire
-    parcellaire-adminer:
-        container_name: parcellaire-express-adminer
-        image: adminer
-        # Ouverture de port pour test si nécessaire
-        #ports:
-        #    - "8080:8080"
-        environment: 
-            - ADMINER_DEFAULT_SERVER=parcellaire-postgis
-            - ADMINER_DESIGN=hydra
+    #parcellaire-adminer:
+    #    container_name: parcellaire-express-adminer
+    #    image: adminer
+    #    ports:
+    #        - "8080:8080"
+    #    environment: 
+    #       - ADMINER_DEFAULT_SERVER=parcellaire-postgis
+    #       - ADMINER_DESIGN=hydra
 
     parcellaire-api:
         container_name: parcellaire-express-api

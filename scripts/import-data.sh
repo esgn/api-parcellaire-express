@@ -12,6 +12,7 @@ cd /tmp/parcellaire-express/
 append=''
 src_epsg=2154
 dst_epsg=4326
+
 for f in *.7z; do
     if [[ $f =~ "RGAF09UTM20" ]]
     then
