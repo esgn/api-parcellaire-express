@@ -36,7 +36,7 @@ Les outils suivants doivent être installés sur la machine :
 ### Routes
 
 * **GET** `/parcelle/{idu}` : Récupération d'une parcelle à partir de son identifiant
-  * Exemple : http://localhost:8010/parcelle/69389000CR0048
+  * Exemple : http://localhost:8010/parcelle/01053000BE0095
 * **GET** `/parcelle?pos={pos}` *ou* `/parcelle?lon={lon}&lat={lat}` : Recherche des parcelles intersectant une position donnée en coordonnées géographiques (WGS84)
   * Exemple : http://localhost:8010/parcelle?pos=5.2709,44.6247
 * **GET** `/parcelle?bbox={bbox}` *ou* `/parcelle?lon_min={lon}&lat_min={lat}&lon_max={lon}&lat_max={lat}` : Recherche des parcelles intersectant une bounding box donnée en coordonnées géographiques (WGS84)
@@ -46,7 +46,7 @@ Les outils suivants doivent être installés sur la machine :
 
 #### Paramètres
 
-* `{idu}` : Identifiant unique de parcelle (ex: `69389000CR0048`)
+* `{idu}` : Identifiant unique de parcelle (ex: `01053000BE0095`)
 * `{lon}` : Longitude (décimal entre -180 et 180)
 * `{lat}` : Latitude (décimal entre -90 et 90)
 * `{pos}` : Position géographique composé de 2 coordonnées (`lon,lat`)
