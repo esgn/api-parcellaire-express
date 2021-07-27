@@ -29,7 +29,7 @@ def download_url(url):
 
 # Téléchargement des archives
 
-url = "https://files.opendatarchives.fr/professionnels.ign.fr/parcellaire-express/PCI-par-DEPT_2021-02/"
+url = "https://files.opendatarchives.fr/professionnels.ign.fr/parcellaire-express/PCI-par-DEPT_2021-04/"
 out_dir = "parcellaire-express"
 regex = re.compile(r'.*\.7z$')
 
