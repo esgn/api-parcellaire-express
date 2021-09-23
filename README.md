@@ -1,35 +1,64 @@
-# api-parcellaire-express
+# API Parcellaire Express
 
-API REST minimale pour diffusion simple du produit IGN [Parcellaire Express](https://geoservices.ign.fr/ressources_documentaires/Espace_documentaire/PARCELLAIRE_CADASTRAL/Parcellaire_Express_PCI/DL_Parcellaire_Express_PCI.pdf).
+Exemple d'API REST minimale pour une diffusion simple du produit IGN [Parcellaire Express](https://geoservices.ign.fr/sites/default/files/2021-07/DC_Parcellaire_Express_%28PCI%29_1-0.pdf).
 
-Seules les parcelles sont diffusées pour le moment.
+Seules les parcelles cadastrales sont diffusées pour le moment.
+
+## Outils utilisés
+
+* [Go](https://golang.org/)
+* [PostgreSQL](https://www.postgresql.org/) / [PostGIS](https://postgis.net/)
+* [Adminer](https://www.adminer.org/)
+* [Python](https://www.python.org/)
 
 ## Prérequis
 
-Les outils suivants doivent être installés sur la machine :
-* Python 3
-* Docker
-* docker-compose
+Les outils suivants doivent être installés sur la machine hôte :
+* [Docker](https://docs.docker.com/get-started/overview/)
+* [Docker Compose](https://docs.docker.com/compose/)
+
+## Architecture
+
+Trois containers sont utilisés : 
+* `parcellaire-express-importer` : Container en charge du téléchargement des donnnées et de leur import en base
+* `parcellaire-express-postgis` : Base de données PostGIS
+* `parcellaire-express-api` : API en Go
+
+Il est possible de décommenter le service `adminer` dans `docker-compose.yml` pour ajouter une interface web d'exploration de la base de données.
 
 ## Préalables
 
-1. Changer le mot de passe par défaut de la base (`password`) dans le fichier docker-compose.yml
-2. Adapter les options de configuration de PostgreSQL dans le fichier docker-compose.yml si nécessaire
-3. Installer les dépendances python nécessaires au téléchargement des données : `pip install -r requirements.txt`
+1. Le fichier `.env` regroupe l'ensemble des valeurs de configuration. On liste ci-dessous les options les plus utiles :
+    * Configuration de l'importer
+      * `MAX_PARALLEL_DL` : Nombre de téléchargement d'archives de données simultanés. Fixé à `4` par défaut.
+      * `TEST_IMPORTER` : A passer à `1` pour tester l'import de données sur une seule archive départementale.
+    * Configuration de la base de données
+      * `POSTGRES_PASSWORD` :  Mot de passe de la base de données. **A modifier**.
+    * Configuration de l'API
+      * `API_PORT` : Port d'écoute de l'API. Fixé à `8010` par défaut.
+      * `MAX_FEATURE` : Nombre maximal d'objets retournés par l'API. Fixé à `1000` par défaut.
+2. Des options de configuration de PostgreSQL sont définies dans le fichier `docker-compose.yml`. Utiliser [PGTune](https://pgtune.leopard.in.ua/#/) pour les adapter aux caractéristiques de la machine hôte.
 
 ## Déploiement
 
-1. Téléchargement du produit IGN Parcellaire Express (PCI)
+1. Construction des images
 
-    `python download-dataset.py`
+    `docker-compose build`
 
 2. Lancement des containers via docker-compose
 
     `docker-compose up -d`
 
-3. Import des données en base (opération longue pouvant être lancée dans un `screen` par exemple)
+3. Import des données en base (opérations longues pouvant être lancées dans un `screen` ou en utilisant l'option `-d` de `docker-compose run`)
 
-    `docker exec -ti parcellaire-express-postgis /bin/bash /tmp/scripts/import-data.sh`
+   * Téléchargement des données du produit :
+
+      `docker-compose run parcellaire-importer python3 /tmp/download-dataset.py`
+
+   * Mise en base des données du produit :
+
+      `docker-compose run parcellaire-importer bash /tmp/import-data.sh`
+
 
 ## Utilisation
 
@@ -54,9 +83,17 @@ Les outils suivants doivent être installés sur la machine :
 
 #### Résultats
 
-Les résultats sont fournis au format [GeoJSON](https://fr.wikipedia.org/wiki/GeoJSON).
+Les résultats sont fournis au format [GeoJSON](https://geojson.org/).
 
 ## Arrêt du service
 
 * Sans suppression des données importées en base : `docker-compose down`
 * Avec suppression des données importées en base : `docker-compose down -v`
+
+## TODO
+
+- [ ] Paging des résultats
+- [ ] Ajout de test unitaires
+- [ ] Eventuel rapprochement avec [OGC API Feature](https://www.ogc.org/standards/ogcapi-features)
+- [ ] Gestion des autres classes du produit Parcellaire Express
+- [ ] Fiabilisation

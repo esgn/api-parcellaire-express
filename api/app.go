@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -16,13 +17,13 @@ const (
 	iduRegex = "[0-9A-Z]{14}"
 	// nombre décimal
 	decimalRegex = "(?:\\.[0-9]+)?"
-	// -180..180
+	// flottant entre -180 et 180
 	lonRegex = "-?0*(?:180(?:\\.0+)?|1[0-7][0-9]" + decimalRegex + "|[0-9]{1,2}" + decimalRegex + ")"
-	// -90..90
+	// flottant entre -90 et 90
 	latRegex = "-?0*(?:90(?:\\.0+)?|[0-8]?[0-9]" + decimalRegex + ")"
-	// lon,lat
+	// position : lon,lat
 	posRegex = lonRegex + "," + latRegex
-	// lon_min,lat_min,lon_max,lat_max
+	// bbox : lon_min,lat_min,lon_max,lat_max
 	bboxRegex = posRegex + "," + posRegex
 )
 
@@ -32,6 +33,8 @@ type App struct {
 }
 
 func (a *App) Initialize(user, password, dbname, hostname string) {
+
+	log.SetOutput(os.Stderr)
 
 	connectionString :=
 		fmt.Sprintf("user=%s password=%s dbname=%s host=%s sslmode=disable", user, password, dbname, hostname)
@@ -80,21 +83,21 @@ func (a App) error(code int, message string) func(http.ResponseWriter, *http.Req
 	}
 }
 
-func (a *App) getById(w http.ResponseWriter, r *http.Request) {
+func (a App) getById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	cleabs := vars["idu"]
 	parcelle, err := getParcelle(a.DB, "idu", cleabs)
 	respondWithAppropriate(w, parcelle, err)
 }
 
-func (a *App) findByPosition(w http.ResponseWriter, r *http.Request) {
+func (a App) findByPosition(w http.ResponseWriter, r *http.Request) {
 	v := r.URL.Query()
 	pos := v.Get("pos")
 	parcelle, err := getParcelleIntersects(a.DB, pos)
 	respondWithAppropriate(w, parcelle, err)
 }
 
-func (a *App) findByPositionSplit(w http.ResponseWriter, r *http.Request) {
+func (a App) findByPositionSplit(w http.ResponseWriter, r *http.Request) {
 	v := r.URL.Query()
 	lon, lat := v.Get("lon"), v.Get("lat")
 	parcelle, err := getParcelleIntersects(a.DB, fmt.Sprintf("%s,%s", lon, lat))
@@ -114,6 +117,11 @@ func (a App) findByBboxSplit(w http.ResponseWriter, r *http.Request) {
 		v.Get("lon_min"), v.Get("lat_min"), v.Get("lon_max"), v.Get("lat_max")
 	parcelle, err := getParcelleBbox(a.DB, fmt.Sprintf("%s,%s,%s,%s", lon_min, lat_min, lon_max, lat_max))
 	respondWithAppropriate(w, parcelle, err)
+}
+
+func (a App) healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	// TODO : Add database status information
+	respondWithJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
 func (a *App) initializeRoutes() {
@@ -136,6 +144,8 @@ func (a *App) initializeRoutes() {
 		"lat_max", "{lat_max:"+latRegex+"}").Methods("GET")
 
 	a.Router.HandleFunc("/parcelle", a.error(http.StatusBadRequest, "Requête invalide"))
+
+	a.Router.HandleFunc("/status", a.healthCheckHandler).Methods("GET")
 
 	a.Router.PathPrefix("/").HandlerFunc(a.error(http.StatusNotFound, "URL inconnue"))
 }

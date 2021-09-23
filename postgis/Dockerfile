@@ -1,13 +1,16 @@
-ARG postgres_version=13
+ARG POSTGRES_VERSION=13
 
-FROM postgres:${postgres_version}
+FROM postgres:${POSTGRES_VERSION}
 
-ARG postgis_version=3
+ARG POSTGIS_VERSION=3
 
+# Installation de postgis
 RUN apt-get update \
- && apt-get install -y postgresql-${PG_MAJOR}-postgis-${postgis_version} \
- && apt-get install -y postgresql-${PG_MAJOR}-postgis-${postgis_version}-scripts \
+ && apt-get install -y postgresql-${PG_MAJOR}-postgis-${POSTGIS_VERSION} \
+ && apt-get install -y postgresql-${PG_MAJOR}-postgis-${POSTGIS_VERSION}-scripts \
  && apt-get install -y postgresql-${PG_MAJOR}-pgrouting \
  && apt-get install -y --no-install-recommends postgis \
- && apt-get install -y p7zip* \
  && rm -rf /var/lib/apt/lists/*
+
+# Utilisateur dédié
+USER postgres:postgres

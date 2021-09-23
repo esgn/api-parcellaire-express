@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	geojson "github.com/paulmach/go.geojson"
 )
@@ -65,14 +66,19 @@ func getGeoJSON(db *sql.DB, query string, args ...interface{}) (*geojson.Feature
 	return fc, nil
 }
 
+func bboxToPolygon(bbox string) string {
+	c := strings.Split(bbox, ",")
+	return fmt.Sprintf("POLYGON ((%[1]s %[2]s, %[1]s %[4]s, %[3]s %[4]s, %[3]s %[2]s, %[1]s %[2]s))", c[0], c[1], c[2], c[3])
+}
+
 func getParcelle(db *sql.DB, key, value string) (*geojson.FeatureCollection, error) {
-	return getGeoJSON(db, fmt.Sprintf("SELECT idu, numero, feuille, section, nom_com, code_com, com_abs, code_arr, ST_AsGeoJSON(geom) FROM %s.parcelle WHERE %s=$1", os.Getenv("APP_DB_SCHEMA"), key), value)
+	return getGeoJSON(db, fmt.Sprintf("SELECT idu, numero, feuille, section, nom_com, code_com, com_abs, code_arr, ST_AsGeoJSON(geom) FROM %s.parcelle WHERE %s=$1", os.Getenv("POSTGRES_SCHEMA"), key), value)
 }
 
 func getParcelleIntersects(db *sql.DB, pos string) (*geojson.FeatureCollection, error) {
-	return getGeoJSON(db, fmt.Sprintf("SELECT idu, numero, feuille, section, nom_com, code_com, com_abs, code_arr, ST_AsGeoJSON(geom) FROM %s.parcelle WHERE ST_Intersects(geom,ST_SetSRID(ST_MakePoint(%s),4326))", os.Getenv("APP_DB_SCHEMA"), pos))
+	return getGeoJSON(db, fmt.Sprintf("SELECT idu, numero, feuille, section, nom_com, code_com, com_abs, code_arr, ST_AsGeoJSON(geom) FROM %s.parcelle WHERE ST_Intersects(geom,ST_SetSRID(ST_MakePoint(%s),4326))", os.Getenv("POSTGRES_SCHEMA"), pos))
 }
 
 func getParcelleBbox(db *sql.DB, bbox string) (*geojson.FeatureCollection, error) {
-	return getGeoJSON(db, fmt.Sprintf("SELECT idu, numero, feuille, section, nom_com, code_com, com_abs, code_arr, ST_AsGeoJSON(geom) FROM %s.parcelle WHERE ST_Intersects(geom,ST_MakeEnvelope(%s,4326))", os.Getenv("APP_DB_SCHEMA"), bbox))
+	return getGeoJSON(db, fmt.Sprintf("SELECT idu, numero, feuille, section, nom_com, code_com, com_abs, code_arr, ST_AsGeoJSON(geom) FROM %s.parcelle WHERE geom && ST_GeomFromText('%s', 4326) LIMIT %s", os.Getenv("POSTGRES_SCHEMA"), bboxToPolygon(bbox), os.Getenv("MAX_FEATURE")))
 }
