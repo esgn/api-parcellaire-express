@@ -117,6 +117,8 @@ func (a App) findByBboxSplit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) initializeRoutes() {
+	a.Router.PathPrefix("/viewer/").Handler(http.StripPrefix("/viewer/", http.FileServer(http.Dir("./views")))).Methods("GET")
+
 	a.Router.HandleFunc("/parcelle/{idu:"+iduRegex+"}", a.getById).Methods("GET")
 
 	a.Router.HandleFunc("/parcelle", a.findByPosition).Queries(
