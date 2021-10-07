@@ -17,8 +17,7 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-# TODO
-- [ ] Add a progress bar
+## TODO ?
+- [ ] Add a progress bar in downloader python script
 - [ ] Add the possibility to select the version of the parcellaire express
-- [ ] Add welcome data 
-- [ ] Add DB TOPO
+- [ ] Add welcome data
