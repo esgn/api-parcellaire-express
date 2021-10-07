@@ -1,6 +1,7 @@
 # More actions
 
 > 🚨 This is for python 3.9. Please adapt for your own version.
+> Use this only if you need to make some local tests without docker.
 
 ## Create a python env
 

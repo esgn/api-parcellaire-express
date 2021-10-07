@@ -28,6 +28,8 @@ Il est possible de décommenter le service `adminer` dans `docker-compose.yml` p
 
 ## Préalables
 
+0. Copier le fichier `.env.example` vers le fichier `.env`. Les valeurs par défauts devraient être suffisantes, mais il vous est possible de l'adapter à votre environnement.
+
 1. Le fichier `.env` regroupe l'ensemble des valeurs de configuration. On liste ci-dessous les options les plus utiles :
     * Configuration de l'importer
       * `MAX_PARALLEL_DL` : Nombre de téléchargement d'archives de données simultanés. Fixé à `4` par défaut.
