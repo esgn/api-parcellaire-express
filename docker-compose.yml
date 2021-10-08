@@ -9,8 +9,8 @@ services:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
       - POSTGRES_DB
-      - POSTGRES_PORT
       - POSTGRES_HOST
+      - POSTGRES_PORT
       - POSTGRES_SCHEMA
       - DOWNLOAD_URL
       - TEST_IMPORTER
@@ -27,11 +27,12 @@ services:
         - POSTGIS_VERSION
     environment:
       - POSTGRES_DB
+      - POSTGRES_PORT
       - POSTGRES_USER
       - POSTGRES_PASSWORD
-    # Exposition du port de la base de données pour test si nécessaire
-    # ports:
-    # - "5432:5432"
+      # Exposition du port de la base de données pour test si nécessaire
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
       - parcellaire-postgis-data:/var/lib/postgresql/data
     # Options de configuration issues de PGTune (https://pgtune.leopard.in.ua)
@@ -75,7 +76,7 @@ services:
       # - "log_statement=all"
     shm_size: 2g
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
       interval: 1m
       timeout: 5s
       retries: 5
@@ -102,9 +103,11 @@ services:
       - POSTGRES_PASSWORD
       - POSTGRES_DB
       - POSTGRES_HOST
+      - POSTGRES_PORT
       - POSTGRES_SCHEMA
       - API_PORT
       - MAX_FEATURE
+      - LIMIT_FEATURE
     ports:
       - "${API_PORT}:${API_PORT}"
     healthcheck:
