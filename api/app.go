@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -32,18 +31,11 @@ type App struct {
 	DB     *sql.DB
 }
 
-func (a *App) Initialize(user, password, dbname, hostname string) {
+func (a *App) Initialize() {
 
-	log.SetOutput(os.Stderr)
+	// log.SetOutput(os.Stderr)
 
-	connectionString :=
-		fmt.Sprintf("user=%s password=%s dbname=%s host=%s sslmode=disable", user, password, dbname, hostname)
-
-	var err error
-	a.DB, err = sql.Open("postgres", connectionString)
-	if err != nil {
-		log.Fatal(err)
-	}
+	a.DB = DB
 
 	a.Router = mux.NewRouter()
 	a.initializeRoutes()
@@ -127,27 +119,27 @@ func (a App) healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 func (a *App) initializeRoutes() {
 	a.Router.PathPrefix("/viewer/").Handler(http.StripPrefix("/viewer/", http.FileServer(http.Dir("./views")))).Methods("GET")
 
-	a.Router.HandleFunc("/parcelle/{idu:"+iduRegex+"}", a.getById).Methods("GET")
+	a.Router.Handle("/parcelle/{idu:"+iduRegex+"}", Use(LogMw).ThenFunc(a.getById)).Methods("GET")
 
-	a.Router.HandleFunc("/parcelle", a.findByPosition).Queries(
+	a.Router.Handle("/parcelle", Use(LogMw).ThenFunc(a.findByPosition)).Queries(
 		"pos", "{pos:"+posRegex+"}").Methods("GET")
 
-	a.Router.HandleFunc("/parcelle", a.findByPositionSplit).Queries(
+	a.Router.Handle("/parcelle", Use(LogMw).ThenFunc(a.findByPositionSplit)).Queries(
 		"lon", "{lon:"+lonRegex+"}",
 		"lat", "{lat:"+latRegex+"}").Methods("GET")
 
-	a.Router.HandleFunc("/parcelle", a.findByBbox).Queries(
+	a.Router.Handle("/parcelle", Use(LogMw).ThenFunc(a.findByBbox)).Queries(
 		"bbox", "{bbox:"+bboxRegex+"}").Methods("GET")
 
-	a.Router.HandleFunc("/parcelle", a.findByBboxSplit).Queries(
+	a.Router.Handle("/parcelle", Use(LogMw).ThenFunc(a.findByBboxSplit)).Queries(
 		"lon_min", "{lon_min:"+lonRegex+"}",
 		"lat_min", "{lat_min:"+latRegex+"}",
 		"lon_max", "{lon_max:"+lonRegex+"}",
 		"lat_max", "{lat_max:"+latRegex+"}").Methods("GET")
 
-	a.Router.HandleFunc("/parcelle", a.error(http.StatusBadRequest, "Requête invalide"))
+	a.Router.Handle("/parcelle", Use(LogMw).ThenFunc(a.error(http.StatusBadRequest, "Requête invalide")))
 
-	a.Router.HandleFunc("/status", a.healthCheckHandler).Methods("GET")
+	a.Router.Handle("/status", Use(LogMw).ThenFunc(a.healthCheckHandler)).Methods("GET")
 
-	a.Router.PathPrefix("/").HandlerFunc(a.error(http.StatusNotFound, "URL inconnue"))
+	a.Router.PathPrefix("/").Handler(Use(LogMw).ThenFunc(a.error(http.StatusNotFound, "URL inconnue")))
 }

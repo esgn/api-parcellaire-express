@@ -100,7 +100,7 @@ func LogMw(next http.Handler) http.Handler {
 // Global connecion pool
 var DB *sql.DB
 
-// TrMw :
+// TrMw is usefull for endpoints with transactional operation like update/insert/delete
 func TrMw(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
