@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -31,25 +32,25 @@ func init() {
 
 // checkEnv ensures all necessary env data is present.
 // panic in case of missing env.
-// hide
+// hide env vars with 'password', 'passwd' or 'key' in their name.
 func checkEnv() {
 	mandatoryEnvs := []string{
-		"POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB",
-		"POSTGRES_HOST", "POSTGRES_PORT", "API_PORT", "POSTGRES_SCHEMA",
-		"MAX_FEATURE", "VIEWER_URL"}
+		ENV_POSTGRES_USER, ENV_POSTGRES_PASSWORD, ENV_POSTGRES_DB,
+		ENV_POSTGRES_HOST, ENV_POSTGRES_PORT, ENV_API_PORT, ENV_POSTGRES_SCHEMA,
+		ENV_MAX_FEATURE}
 
-	optionalEnvs := []string{"VIEWER_URL"}
+	optionalEnvs := []string{ENV_VIEWER_URL}
 
 	reIsPassword := regexp.MustCompile(`(?i)password|passwd|key`)
 
 	for _, theEnvName := range mandatoryEnvs {
 		theEnv, isPresent := os.LookupEnv(theEnvName)
 		if !isPresent {
-			log.Fatalf("Sorry, env %v is mandatory. Please check environment variable or use --env <path> options", theEnvName)
+			log.Fatalf("Sorry, env %v is mandatory. Please check environment variable or use --env <path> options\n", theEnvName)
 		}
 
 		if reIsPassword.MatchString(theEnvName) {
-			theEnv = "********"
+			theEnv = fmt.Sprintf("*(%v)*", len(theEnv))
 		}
 
 		fmt.Printf("* %s : %s \n", theEnvName, theEnv)
@@ -66,10 +67,12 @@ func checkEnv() {
 
 		fmt.Printf("# %s : %s \n", theEnvName, theEnv)
 	}
+
+	// check the format
+	strconv.Atoi(os.Getenv(""))
 }
 
 // initDB creates a global connection pool from identifiers.
-// DB is global, because it is the connection pool not the connection itself.
 func initDB(user, password, dbname, hostname, port string) *sql.DB {
 	connectionString :=
 		fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable", user, password, dbname, hostname, port)
@@ -85,11 +88,11 @@ func initDB(user, password, dbname, hostname, port string) *sql.DB {
 func main() {
 	// I choosed to initiliazed DB outside the app
 	// because of the global nature of the connection pool (check DB.Close() comment)
-	DB := initDB(os.Getenv("POSTGRES_USER"),
-		os.Getenv("POSTGRES_PASSWORD"),
-		os.Getenv("POSTGRES_DB"),
-		os.Getenv("POSTGRES_HOST"),
-		os.Getenv("POSTGRES_PORT"))
+	DB := initDB(os.Getenv(ENV_POSTGRES_USER),
+		os.Getenv(ENV_POSTGRES_PASSWORD),
+		os.Getenv(ENV_POSTGRES_DB),
+		os.Getenv(ENV_POSTGRES_HOST),
+		os.Getenv(ENV_POSTGRES_PORT))
 	// not really necessary, but maniac decision 💩
 	defer DB.Close()
 

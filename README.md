@@ -38,8 +38,7 @@ Il est possible de décommenter le service `adminer` dans `docker-compose.yml` p
       * `POSTGRES_PASSWORD` :  Mot de passe de la base de données. **A modifier**.
     * Configuration de l'API
       * `API_PORT` : Port d'écoute de l'API. Fixé à `8010` par défaut.
-      * `MAX_FEATURE` : Nombre maximal d'objets retournés par l'API. Fixé à `1000` par défaut.
-      * `LIMIT_FEATURE` : à passer à `1` pour prendre en compte `MAX_FEATURE`. `1` par défaut.
+      * `MAX_FEATURE` : Nombre maximal d'objets retournés par l'API. Fixé à `1000` par défaut. `0` pour désactiver la limite
 2. Des options de configuration de PostgreSQL sont définies dans le fichier `docker-compose.yml`. Utiliser [PGTune](https://pgtune.leopard.in.ua/#/) pour les adapter aux caractéristiques de la machine hôte.
 
 ## Déploiement
