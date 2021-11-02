@@ -1,4 +1,3 @@
-parcellaire-express/
-ign-env
 *.swp
 .env
+.DS_Store
