@@ -48,10 +48,24 @@ func checkEnv() {
 		}
 
 		if reIsPassword.MatchString(theEnvName) {
-			theEnv = fmt.Sprintf("*(%v)*", len(theEnv))
+			theEnv = fmt.Sprintf("**(%v)**", len(theEnv))
 		}
 
 		fmt.Printf("* %s : %s \n", theEnvName, theEnv)
+	}
+
+	optionalEnvs := []string{ENV_VIEWER_URL}
+
+	for _, theEnvName := range optionalEnvs {
+		theEnv, isPresent := os.LookupEnv(theEnvName)
+
+		if !isPresent {
+			theEnv = "<undefined>"
+		} else if reIsPassword.MatchString(theEnvName) {
+			theEnv = fmt.Sprintf("**(%v)**", len(theEnv))
+		}
+
+		fmt.Printf("# %s : %s \n", theEnvName, theEnv)
 	}
 
 	// checks the format
@@ -61,7 +75,7 @@ func checkEnv() {
 	if err != nil {
 		log.Fatalf("%v should be a number but is '%v'\n", ENV_MAX_FEATURE, _maxFeatureRaw)
 	}
-	if _maxFeature >= 0 {
+	if _maxFeature < 0 {
 		log.Fatalf("%v should be positive but is %v", ENV_MAX_FEATURE, _maxFeature)
 	}
 }
