@@ -39,8 +39,6 @@ func checkEnv() {
 		ENV_POSTGRES_HOST, ENV_POSTGRES_PORT, ENV_API_PORT, ENV_POSTGRES_SCHEMA,
 		ENV_MAX_FEATURE}
 
-	optionalEnvs := []string{ENV_VIEWER_URL}
-
 	reIsPassword := regexp.MustCompile(`(?i)password|passwd|key`)
 
 	for _, theEnvName := range mandatoryEnvs {
@@ -56,20 +54,16 @@ func checkEnv() {
 		fmt.Printf("* %s : %s \n", theEnvName, theEnv)
 	}
 
-	for _, theEnvName := range optionalEnvs {
-		theEnv, isPresent := os.LookupEnv(theEnvName)
-
-		if !isPresent {
-			theEnv = "?"
-		} else if reIsPassword.MatchString(theEnvName) {
-			theEnv = "********"
-		}
-
-		fmt.Printf("# %s : %s \n", theEnvName, theEnv)
+	// checks the format
+	// TODO: replace by a more clever code.
+	_maxFeatureRaw := os.Getenv(ENV_MAX_FEATURE)
+	_maxFeature, err := strconv.Atoi(_maxFeatureRaw)
+	if err != nil {
+		log.Fatalf("%v should be a number but is '%v'\n", ENV_MAX_FEATURE, _maxFeatureRaw)
 	}
-
-	// check the format
-	strconv.Atoi(os.Getenv(""))
+	if _maxFeature >= 0 {
+		log.Fatalf("%v should be positive but is %v", ENV_MAX_FEATURE, _maxFeature)
+	}
 }
 
 // initDB creates a global connection pool from identifiers.
@@ -93,10 +87,10 @@ func main() {
 		os.Getenv(ENV_POSTGRES_DB),
 		os.Getenv(ENV_POSTGRES_HOST),
 		os.Getenv(ENV_POSTGRES_PORT))
-	// not really necessary, but maniac decision 💩
+	// not really necessary, but maniac decision [💩]
 	defer DB.Close()
 
 	a := App{}
 	a.Initialize(DB)
-	a.Run(":" + os.Getenv("API_PORT"))
+	a.Run(":" + os.Getenv(ENV_API_PORT))
 }

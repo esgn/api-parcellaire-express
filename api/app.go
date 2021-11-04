@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -116,11 +115,6 @@ func (a App) healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) initializeRoutes() {
-	theViewerUrl, isViewerUrldefined := os.LookupEnv("VIEWER_URL")
-	if isViewerUrldefined {
-		log.Printf("Html viewer is enabled : %v", isViewerUrldefined)
-		a.Router.PathPrefix(theViewerUrl).Handler(http.StripPrefix(theViewerUrl, http.FileServer(http.Dir("./views")))).Methods("GET")
-	}
 
 	a.Router.Handle("/parcelle/{idu:"+iduRegex+"}", Use(LogMw).ThenFunc(a.getById)).Methods("GET")
 

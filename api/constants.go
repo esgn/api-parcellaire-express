@@ -3,6 +3,7 @@ package main
 ///
 // Mandatory env vars
 ///
+
 const (
 	ENV_POSTGRES_USER     = "POSTGRES_USER"
 	ENV_POSTGRES_PASSWORD = "POSTGRES_PASSWORD"
@@ -13,9 +14,3 @@ const (
 	ENV_POSTGRES_SCHEMA   = "POSTGRES_SCHEMA"
 	ENV_MAX_FEATURE       = "MAX_FEATURE"
 )
-
-///
-// Optional env vars
-///
-
-const ENV_VIEWER_URL = "VIEWER_URL"

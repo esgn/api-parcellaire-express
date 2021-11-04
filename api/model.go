@@ -72,19 +72,20 @@ func bboxToPolygon(bbox string) string {
 }
 
 func getParcelle(db *sql.DB, key, value string) (*geojson.FeatureCollection, error) {
-	return getGeoJSON(db, fmt.Sprintf("SELECT idu, numero, feuille, section, nom_com, code_com, com_abs, code_arr, ST_AsGeoJSON(geom) FROM %s.parcelle WHERE %s=$1", os.Getenv("POSTGRES_SCHEMA"), key), value)
+	return getGeoJSON(db, fmt.Sprintf("SELECT idu, numero, feuille, section, nom_com, code_com, com_abs, code_arr, ST_AsGeoJSON(geom) FROM %s.parcelle WHERE %s=$1", os.Getenv(ENV_POSTGRES_SCHEMA), key), value)
 }
 
 func getParcelleIntersects(db *sql.DB, pos string) (*geojson.FeatureCollection, error) {
-	return getGeoJSON(db, fmt.Sprintf("SELECT idu, numero, feuille, section, nom_com, code_com, com_abs, code_arr, ST_AsGeoJSON(geom) FROM %s.parcelle WHERE ST_Intersects(geom,ST_SetSRID(ST_MakePoint(%s),4326))", os.Getenv("POSTGRES_SCHEMA"), pos))
+	return getGeoJSON(db, fmt.Sprintf("SELECT idu, numero, feuille, section, nom_com, code_com, com_abs, code_arr, ST_AsGeoJSON(geom) FROM %s.parcelle WHERE ST_Intersects(geom,ST_SetSRID(ST_MakePoint(%s),4326))", os.Getenv(ENV_POSTGRES_SCHEMA), pos))
 }
 
 func getParcelleBbox(db *sql.DB, bbox string) (*geojson.FeatureCollection, error) {
 	_sql := "SELECT idu, numero, feuille, section, nom_com, code_com, com_abs, code_arr, ST_AsGeoJSON(geom) FROM %s.parcelle WHERE geom && ST_GeomFromText('%s', 4326)"
 
-	if os.Getenv("LIMIT_FEATURE") == "1" {
-		return getGeoJSON(db, fmt.Sprintf(_sql+" LIMIT %s", os.Getenv("POSTGRES_SCHEMA"), bboxToPolygon(bbox), os.Getenv("MAX_FEATURE")))
+	_limiter := ""
+	if os.Getenv(ENV_MAX_FEATURE) != "0" {
+		_limiter = fmt.Sprintf(" LIMIT %s", os.Getenv(ENV_MAX_FEATURE))
 	}
 
-	return getGeoJSON(db, fmt.Sprintf(_sql, os.Getenv("POSTGRES_SCHEMA"), bboxToPolygon(bbox)))
+	return getGeoJSON(db, fmt.Sprintf(_sql+_limiter, os.Getenv(ENV_POSTGRES_SCHEMA), bboxToPolygon(bbox)))
 }
