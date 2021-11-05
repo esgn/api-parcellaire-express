@@ -28,6 +28,8 @@
       // try to retrieve server information
       const baseUrl = `${window.location.protocol}//${window.location.host}`;
       var reqControl = undefined;
+      // optional apiKey
+      var apiKey = undefined;
 
       // PARIS
       const map = L.map("map", {
@@ -68,9 +70,44 @@
           reqControl = new AbortController();
           const { signal } = reqControl;
 
-          fetch(`${baseUrl}/parcelle?bbox=${map.getBounds().toBBoxString()}`, {
+          const _url = `${baseUrl}/parcelle?bbox=${map
+            .getBounds()
+            .toBBoxString()}`;
+
+          var _headers = new Headers();
+          if (apiKey) {
+            _headers.append("Authorization", `Bearer ${apiKey}`);
+          }
+
+          var _promise = fetch(_url, {
             signal,
-          })
+            headers: _headers,
+          });
+
+          _promise.then((response) => {
+            if (response.status === 401) {
+              apiKey = prompt("Please provides the apiKey", "<SECURITY>");
+
+              if (apiKey) {
+                _headers.delete("Authorization");
+                _headers.append("Authorization", `Bearer ${apiKey}`);
+              }
+
+              _promise = fetch(_url, {
+                signal,
+                headers: _headers,
+              });
+            } else if (response.status === 403) {
+              console.warn(
+                "❌ Forbidden. Apikey is incorrect. Refresh to provide a new one."
+              );
+              apiKey = undefined;
+            } else {
+              return response;
+            }
+          });
+
+          _promise
             .then((e) => e.json())
             .then((data) => {
               console.log("✅ - parcels recieved");
