@@ -20,3 +20,4 @@ const (
 ///
 
 const ENV_VIEWER_URL = "VIEWER_URL"
+const ENV_API_KEY = "API_KEY"
