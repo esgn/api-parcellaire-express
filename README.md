@@ -39,9 +39,9 @@ Il est possible de décommenter le service `adminer` dans `docker-compose.yml` p
     * Configuration de l'API
       * `API_PORT` : Port d'écoute de l'API. Fixé à `8010` par défaut.
       * `MAX_FEATURE` : Nombre maximal d'objets retournés par l'API. Fixé à `1000` par défaut. `0` pour désactiver la limite.
-      * `API_KEY` : (Optionel) Bearer Authentication. Laisser vide ou non défini pour désactiver.
+      * `API_KEY` : (Optionnel) Bearer Authentication. Laisser vide ou non défini pour désactiver.
     * Configuration du viewer
-      * `VIEWER_URL` : (Optionel) Url d'accès à une page de consultation des parcelles. Laisser vide ou non défini pour désactiver.
+      * `VIEWER_URL` : (Optionnel) Url d'accès à une page de consultation des parcelles. Laisser vide ou non défini pour désactiver.
 2. Des options de configuration de PostgreSQL sont définies dans le fichier `docker-compose.yml`. Utiliser [PGTune](https://pgtune.leopard.in.ua/#/) pour les adapter aux caractéristiques de la machine hôte.
 
 ## Déploiement
@@ -63,6 +63,27 @@ Il est possible de décommenter le service `adminer` dans `docker-compose.yml` p
    * Mise en base des données du produit :
 
       `docker-compose run parcellaire-importer bash /tmp/import-data.sh`
+
+## Kubernetes
+
+Détails : (De docker-compose à K8s)[https://kubernetes.io/fr/docs/tasks/configure-pod-container/translate-compose-kubernetes/]
+
+1. Installer Kompose en suivant les instructions de la documentation
+
+2. Extraire la version avec les valeurs du fichier [`.env`]
+
+    `docker-compose config > docker-compose-config.yml`
+
+3. Lancer la commande 
+
+    `kompose convert -f docker-compose-config.yml`
+
+4. Créer un ficher `kustomization.yaml` qui contient la liste de fichiers. 
+
+
+5. Lancer le déploiement (en fonction des ressourcs disponibles, vous devrez modifier les quotas cpu/mémoire/etc)
+
+    `kubectl apply -k .`
 
 
 ## Utilisation
