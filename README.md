@@ -66,9 +66,9 @@ Il est possible de décommenter le service `adminer` dans `docker-compose.yml` p
 
 ## Kubernetes
 
-Détails : (De docker-compose à K8s)[https://kubernetes.io/fr/docs/tasks/configure-pod-container/translate-compose-kubernetes/]
+Détails : [De docker-compose à K8s](https://kubernetes.io/fr/docs/tasks/configure-pod-container/translate-compose-kubernetes/)
 
-1. Installer Kompose en suivant les instructions de la documentation
+1. Installer Kompose en suivant les instructions de la [documentation](https://kompose.io)
 
 2. Extraire la version avec les valeurs du fichier [`.env`]
 
@@ -81,7 +81,7 @@ Détails : (De docker-compose à K8s)[https://kubernetes.io/fr/docs/tasks/config
 4. Créer un ficher `kustomization.yaml` qui contient la liste de fichiers. 
 
 
-5. Lancer le déploiement (en fonction des ressourcs disponibles, vous devrez modifier les quotas cpu/mémoire/etc)
+5. Lancer le déploiement (en fonction des ressources disponibles, vous devrez peut-être modifier les quotas cpu/mémoire/etc des fichiers `-deployment.yaml`)
 
     `kubectl apply -k .`
 
