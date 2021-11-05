@@ -54,7 +54,7 @@ func checkEnv() {
 		fmt.Printf("* %s : %s \n", theEnvName, theEnv)
 	}
 
-	optionalEnvs := []string{ENV_VIEWER_URL}
+	optionalEnvs := []string{ENV_VIEWER_URL, ENV_API_KEY}
 
 	for _, theEnvName := range optionalEnvs {
 		theEnv, isPresent := os.LookupEnv(theEnvName)
