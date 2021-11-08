@@ -41,14 +41,14 @@ func formatLog(message string, ps ...interface{}) string {
 // --------------------
 
 type GeneralMessage struct {
-	Message string `json:message`
-	Error   bool   `json:error`
-	Literal string `json:literal`
+	Message string `json:"message"`
+	Error   bool   `json:"error"`
+	Literal string `json:"literal"`
 }
 
 type ContentMessage struct {
 	GeneralMessage
-	Payload interface{} `json:data`
+	Payload interface{} `json:"data"`
 }
 
 // statusWriter wraps an http response.
