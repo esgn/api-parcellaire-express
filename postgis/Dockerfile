@@ -5,12 +5,15 @@ FROM postgres:${POSTGRES_VERSION}
 ARG POSTGIS_VERSION=3
 
 # Installation de postgis
-RUN apt-get update \
- && apt-get install -y postgresql-${PG_MAJOR}-postgis-${POSTGIS_VERSION} \
- && apt-get install -y postgresql-${PG_MAJOR}-postgis-${POSTGIS_VERSION}-scripts \
- && apt-get install -y postgresql-${PG_MAJOR}-pgrouting \
- && apt-get install -y --no-install-recommends postgis \
- && rm -rf /var/lib/apt/lists/*
+RUN set -ex \
+    && EXEC_DEPS=" \
+    postgresql-${PG_MAJOR}-postgis-${POSTGIS_VERSION} \
+    postgresql-${PG_MAJOR}-postgis-${POSTGIS_VERSION}-scripts \
+    postgresql-${PG_MAJOR}-pgrouting \
+    postgis \
+    " \
+    && apt update && apt install -y --no-install-recommends $EXEC_DEPS \
+    && rm -rf /var/lib/apt/lists/*
 
 # Utilisateur dédié
 USER postgres:postgres

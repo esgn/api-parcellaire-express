@@ -17,6 +17,11 @@ services:
       - MAX_PARALLEL_DL
     volumes:
       - importer-data:/tmp
+    command:
+      - "cp"
+      - "-v"
+      - "/script/*"
+      - "/tmp/."
 
   parcellaire-postgis:
     container_name: parcellaire-express-postgis
@@ -30,9 +35,9 @@ services:
       - POSTGRES_PORT
       - POSTGRES_USER
       - POSTGRES_PASSWORD
-      # Exposition du port de la base de données pour test si nécessaire
-    ports:
-      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    # Exposition du port de la base de données pour test si nécessaire
+    #ports:
+    #  - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
       - parcellaire-postgis-data:/var/lib/postgresql/data
     # Options de configuration issues de PGTune (https://pgtune.leopard.in.ua)
