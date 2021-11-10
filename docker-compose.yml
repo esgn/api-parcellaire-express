@@ -113,7 +113,6 @@ services:
       - API_PORT
       - API_KEY
       - MAX_FEATURE
-      - LIMIT_FEATURE
       - VIEWER_URL
     ports:
       - "${API_PORT}:${API_PORT}"
