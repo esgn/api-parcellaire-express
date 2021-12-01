@@ -18,7 +18,7 @@ services:
       #- importer-data:/tmp
       - /data/parcellaire/importer:/tmp
     networks:
-      - ${STACK_NETWORK_NAME}      
+      - traefik-public      
     command: /bin/bash /scripts/cmd.sh
 
   parcellaire-postgis:
@@ -27,7 +27,7 @@ services:
     #ports:
     #  - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     networks:
-      - ${STACK_NETWORK_NAME}      
+      - traefik-public      
     volumes:
       #- parcellaire-postgis-data:/var/lib/postgresql/data
       # 🚨 Please change the owner of /data/parcellaire/postgresql to 999:999 first.
@@ -38,14 +38,14 @@ services:
     #ports:
       #- "${API_PORT}:${API_PORT}"
     networks:
-      - ${STACK_NETWORK_NAME}      
+      - traefik-public
     deploy:
       labels:
       - "traefik.enable=true"
       - "traefik.port=${API_PORT}"
       - "traefik.frontend.rule=Host:${STACK_FRONTEND_DNS}"
       - "traefik.frontend.entryPoints=http,https"
-      - "traefik.docker.network=${STACK_NETWORK_NAME}"
+      - "traefik.docker.network=traefik-public"
 
 # Activate this if you want to use volume instead of binded directories.
 #volumes:
@@ -55,5 +55,6 @@ services:
 #    name: importer-data
 
 networks:
-  ${STACK_NETWORK_NAME}:
+  traefik-public:
     external: true
+    name: traefik-public

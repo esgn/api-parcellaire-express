@@ -92,6 +92,7 @@ Ces commandes s'appliquent pour un déploiement en production avec docker stack 
 
 2. Compléter le fichier [`.env`] avec les informations de la production, notamment le chemin des images et le nom du réseau traefik.
 
+    - `STACK_FRONTEND_DNS` : Par exemple `ign-parcellaire.yoursite.org`. S'assurer que l'entrée DNS existe AVANT le déploiement.
     - `STACK_NETWORK_NAME` : Par exemple `traefik-public`
     - `STACK_IMAGE_IMPORTER` : Par exemple `ghcrio.io/esgn/parcellaire-importer:latest`
     - `STACK_IMAGE_API` : Par exemple `ghcrio.io/esgn/parcellaire-importer:latest`
