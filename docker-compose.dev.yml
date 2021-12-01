@@ -1,0 +1,32 @@
+version: "3.8"
+
+#####
+# ⭐️ This file is not independent :
+## 🟢 Docker-compose DEV mode, starts with
+# $ docker-compose [build|up -d|down] -f docker-compose.common.yml -f docker-compose.dev.yml
+# OR
+# $ docker-compose config docker-compose.common.yml -f docker-compose.dev.yml > docker-compose.yml
+# $ docker-compose [build|up -d|down]
+#####
+
+# 🪧 Some information on this file : 
+# See : https://docs.docker.com/compose/compose-file/compose-file-v3/
+
+services:
+  parcellaire-importer:
+    volumes:
+      - importer-data:/tmp
+
+  parcellaire-postgis:
+    volumes:
+      - parcellaire-postgis-data:/var/lib/postgresql/data
+
+  parcellaire-api:
+    ports:
+      - "${API_PORT}:${API_PORT}"
+
+volumes:
+  parcellaire-postgis-data:
+    name: parcellaire-postgis-data
+  importer-data:
+    name: importer-data

@@ -1,0 +1,54 @@
+version: "3.8"
+
+#####
+# ⭐️ This file is not independent :
+## 🟢 Docker-compose STACK mode, starts with
+# $ docker-compose config docker-compose.common.yml -f docker-compose.stack.yml > docker-stack.yml
+# $ docker stack [deploy|rm] --with-registry-auth
+# OR
+# $ docker-compose config docker-compose.common.yml -f docker-compose.stack.yml > docker-stack.yml
+# $ docker stack [deploy|rm] -c docker-stack.yml --with-registry-auth
+###### 
+
+
+# 🪧 Some information on this file : 
+# See : https://docs.docker.com/compose/compose-file/compose-file-v3/
+
+services:
+  parcellaire-importer:
+    image: ghcr.io/dnclain/parcellaire-importer:latest
+    volumes:
+      #- importer-data:/tmp
+      - /data/parcellaire/importer:/tmp
+    networks:
+      - traefik-public      
+    command: /bin/bash /scripts/cmd.sh
+
+  parcellaire-postgis:
+    image: ghcr.io/dnclain/parcellaire-postgis:latest
+    # Exposition du port de la base de données pour test si nécessaire
+    #ports:
+    #  - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    networks:
+      - traefik-public      
+    volumes:
+      #- parcellaire-postgis-data:/var/lib/postgresql/data
+      - /data/parcellaire/postgresql:/var/lib/postgresql/data
+
+  parcellaire-api:
+    image: ghcr.io/dnclain/parcellaire-api:latest
+    #ports:
+      #- "${API_PORT}:${API_PORT}"
+    networks:
+      - traefik-public      
+    deploy:
+      labels:
+      - "traefik.enable=true"
+      - "traefik.port=${API_PORT}"
+      - "traefik.frontend.rule=Host:ign-parcel.geosophy.io"
+      - "traefik.frontend.entryPoints=http,https"
+      - "traefik.docker.network=traefik-public"
+
+networks:
+  traefik-public:
+    external: true
