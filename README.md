@@ -64,26 +64,72 @@ Il est possible de décommenter le service `adminer` dans `docker-compose.yml` p
 
       `docker-compose run parcellaire-importer bash /tmp/import-data.sh`
 
-## Kubernetes
+## Stack and traefik
 
-Détails : [De docker-compose à K8s](https://kubernetes.io/fr/docs/tasks/configure-pod-container/translate-compose-kubernetes/)
+Ces commandes s'appliquent pour un déploiement en production avec docker stack et traefik :
 
-1. Installer Kompose en suivant les instructions de la [documentation](https://kompose.io)
+0. Builder chaque image et les déployer vers une registry (Github/Gitlab/...)
+    
+    ```bash
+    # Login 
+    docker login <registry_url>
+    # API
+    cd api
+    docker build . -t <registry_url>/username/parcellaire-api:latest
+    docker push <registry_url>/username/parcellaire-api:latest
+    # POSTGRES
+    cd ../postgis
+    docker build . -t <registry_url>/username/parcellaire-postgis:latest
+    docker push <registry_url>/username/parcellaire-postgis:latest
+    # IMPORTER
+    cd ../importer
+    docker build . -t <registry_url>/username/parcellaire-importer:latest
+    docker push <registry_url>/username/parcellaire-importer:latest
+    ```
 
-2. Extraire la version avec les valeurs du fichier [`.env`]
+1. Installer docker-composer en suivant les instructions de la [documentation](https://docs.docker.com/compose/install/)
 
-    `docker-compose config > docker-compose-config.yml`
+2. Compléter le fichier `.env` avec les informations de la production, notamment le chemin des images et le nom du réseau traefik.
 
-3. Lancer la commande 
+    - `DOCKER_STACK_NETWORK_NAME` : Par exemple `traefik-public`
+    - `DOCKER_STACK_IMAGE_` : 
 
-    `kompose convert -f docker-compose-config.yml`
+3. Extraire la version avec les valeurs du fichier [`.env`]
 
-4. Créer un ficher `kustomization.yaml` qui contient la liste de fichiers. 
+    `docker-compose config -f docker-compose.common.yml -f docker-compose.stack > docker-stack.yml`
 
+4. S'authentifier si nécessaire pour avoir accès aux images 
 
-5. Lancer le déploiement (en fonction des ressources disponibles, vous devrez peut-être modifier les quotas cpu/mémoire/etc des fichiers `-deployment.yaml`)
+    `docker login <registry_url>`
 
-    `kubectl apply -k .`
+5. Lancement
+
+    ```bash
+    # Deploy
+    docker stack deploy parcellaire --with-registry-auth
+    # Check 
+    docker stack ps --no-trunc
+    # Service reference 
+    docker service ls
+    ```
+
+6. Installation
+
+    Même procédure que pour `docker-compose` :
+    
+   * Téléchargement des données du produit :
+
+      `docker exec parcellaire_parcellaire-importer.XXXXX python3 /tmp/download-dataset.py`
+
+   * Mise en base des données du produit :
+
+      `docker exec pacellaire_parcellaire-importer.XXXXX /bin/bash /tmp/import-data.sh`
+   
+   * Enjoy !
+
+7. Arrêt
+
+    `docker stack rm parcellaire`
 
 
 ## Utilisation
