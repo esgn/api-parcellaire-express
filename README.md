@@ -93,7 +93,6 @@ Ces commandes s'appliquent pour un déploiement en production avec docker stack 
 2. Compléter le fichier [`.env`] avec les informations de la production, notamment le chemin des images et le nom du réseau traefik.
 
     - `STACK_FRONTEND_DNS` : Par exemple `ign-parcellaire.yoursite.org`. S'assurer que l'entrée DNS existe AVANT le déploiement.
-    - `STACK_NETWORK_NAME` : Par exemple `traefik-public`
     - `STACK_IMAGE_IMPORTER` : Par exemple `ghcrio.io/esgn/parcellaire-importer:latest`
     - `STACK_IMAGE_API` : Par exemple `ghcrio.io/esgn/parcellaire-importer:latest`
     - `STACK_IMAGE_POSTGIS` : Par exmeple `ghcrio.io/esgn/parcellaire-postgis:latest`
@@ -101,6 +100,8 @@ Ces commandes s'appliquent pour un déploiement en production avec docker stack 
 3. Extraire la version avec les valeurs du fichier [`.env`]
 
     `docker-compose -f docker-compose.common.yml -f docker-compose.stack > docker-stack.yml config`
+
+    Modifier le nom du réseau qui correspond à votre environnement directement dans  `docker-stack.yml`.
 
 4. S'authentifier si nécessaire avec un clé qui les droits de pull 
 
