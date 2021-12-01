@@ -6,7 +6,7 @@ version: "3.8"
 # docker login <registry_url>
 # docker-compose -f docker-compose.common.yml -f docker-compose.stack.yml config > docker-stack.yml
 # docker stack deploy parcellaire -c docker-stack.yml --with-registry-auth
-###### 
+#####
 
 # 🪧 Some information on this file : 
 # See : https://docs.docker.com/compose/compose-file/compose-file-v3/
