@@ -72,33 +72,36 @@ Ces commandes s'appliquent pour un déploiement en production avec docker stack 
     
     ```bash
     # Login 
+    # S'assurer que la clé permet le push d'image.
     docker login <registry_url>
     # API
     cd api
-    docker build . -t <registry_url>/username/parcellaire-api:latest
+    docker build . -t <registry_url>/<username>/parcellaire-api:latest
     docker push <registry_url>/username/parcellaire-api:latest
     # POSTGRES
     cd ../postgis
-    docker build . -t <registry_url>/username/parcellaire-postgis:latest
+    docker build . -t <registry_url>/<username>/parcellaire-postgis:latest
     docker push <registry_url>/username/parcellaire-postgis:latest
     # IMPORTER
     cd ../importer
-    docker build . -t <registry_url>/username/parcellaire-importer:latest
+    docker build . -t <registry_url>/<username>/parcellaire-importer:latest
     docker push <registry_url>/username/parcellaire-importer:latest
     ```
 
-1. Installer docker-composer en suivant les instructions de la [documentation](https://docs.docker.com/compose/install/)
+1. Installer `docker-compose` en suivant les instructions de la [documentation](https://docs.docker.com/compose/install/)
 
-2. Compléter le fichier `.env` avec les informations de la production, notamment le chemin des images et le nom du réseau traefik.
+2. Compléter le fichier [`.env`] avec les informations de la production, notamment le chemin des images et le nom du réseau traefik.
 
-    - `DOCKER_STACK_NETWORK_NAME` : Par exemple `traefik-public`
-    - `DOCKER_STACK_IMAGE_` : 
+    - `STACK_NETWORK_NAME` : Par exemple `traefik-public`
+    - `STACK_IMAGE_IMPORTER` : Par exemple `ghcrio.io/esgn/parcellaire-importer:latest`
+    - `STACK_IMAGE_API` : Par exemple `ghcrio.io/esgn/parcellaire-importer:latest`
+    - `STACK_IMAGE_POSTGIS` : Par exmeple `ghcrio.io/esgn/parcellaire-postgis:latest`
 
 3. Extraire la version avec les valeurs du fichier [`.env`]
 
-    `docker-compose config -f docker-compose.common.yml -f docker-compose.stack > docker-stack.yml`
+    `docker-compose -f docker-compose.common.yml -f docker-compose.stack > docker-stack.yml config`
 
-4. S'authentifier si nécessaire pour avoir accès aux images 
+4. S'authentifier si nécessaire avec un clé qui les droits de pull 
 
     `docker login <registry_url>`
 

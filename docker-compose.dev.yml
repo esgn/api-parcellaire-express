@@ -14,14 +14,30 @@ version: "3.8"
 
 services:
   parcellaire-importer:
+    container_name: parcellaire-express-importer
+    build:
+      context: ./importer  
     volumes:
       - importer-data:/tmp
 
   parcellaire-postgis:
+    container_name: parcellaire-express-postgis
+    build:
+      context: ./postgis
+      args:
+        - POSTGRES_VERSION
+        - POSTGIS_VERSION  
+    shm_size: 2g
     volumes:
       - parcellaire-postgis-data:/var/lib/postgresql/data
-
+  
   parcellaire-api:
+    container_name: parcellaire-express-api
+    # build command is ignored on docker stack. 
+    build:
+      context: ./api
+      args:
+        - api_port=${API_PORT}
     ports:
       - "${API_PORT}:${API_PORT}"
 

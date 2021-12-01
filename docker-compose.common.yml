@@ -3,15 +3,14 @@ version: "3.8"
 #####
 # ⭐️ This file is not independent :
 ## 🟢 Docker-compose DEV mode, starts with
-# $ docker-compose [build|up -d|down] -f docker-compose.common.yml -f docker-compose.dev.yml
+# $ docker-compose -f docker-compose.common.yml -f docker-compose.dev.yml [build|up -d|down]
 # OR
-# $ docker-compose config docker-compose.common.yml -f docker-compose.dev.yml > docker-compose.yml
+# $ docker-compose docker-compose.common.yml -f docker-compose.dev.yml config > docker-compose.yml
 # $ docker-compose [build|up -d|down]
 ## 🟢 Docker-compose STACK mode, starts with
-# $ docker-compose config docker-compose.common.yml -f docker-compose.stack.yml > docker-stack.yml
-# $ docker stack [deploy|rm] --with-registry-auth
-# OR
-# $ docker stack [deploy|rm] -c docker-stack.yml --with-registry-auth
+# $ docker login <registry_url>
+# $ docker-compose -f docker-compose.common.yml -f docker-compose.stack.yml config > docker-stack.yml
+# $ docker stack deploy parcellaire -c docker-stack.yml --with-registry-auth
 ###### 
 
 
@@ -20,13 +19,6 @@ version: "3.8"
 
 services:
   parcellaire-importer:
-    # container_name is ignored on docker stack. 
-    container_name: parcellaire-express-importer
-    # build command is ignored on docker stack. 
-    build:
-      context: ./importer
-    # image ref is ignored on docker compose. 
-    image: ghcr.io/dnclain/parcellaire-importer:latest
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
@@ -42,14 +34,6 @@ services:
       #- /data/parcellaire/importer:/tmp
 
   parcellaire-postgis:
-    container_name: parcellaire-express-postgis
-    # build command is ignored on docker stack. 
-    build:
-      context: ./postgis
-      args:
-        - POSTGRES_VERSION
-        - POSTGIS_VERSION
-    image: ghcr.io/dnclain/parcellaire-postgis:latest
     environment:
       - POSTGRES_DB
       - POSTGRES_PORT
@@ -100,7 +84,6 @@ services:
       # Pour logguer l'intégralité des requêtes effectuées sur la base
       # - "-c"
       # - "log_statement=all"
-    shm_size: 2g
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
       interval: 1m
@@ -119,13 +102,6 @@ services:
   #        - ADMINER_DESIGN=hydra
 
   parcellaire-api:
-    container_name: parcellaire-express-api
-    # build command is ignored on docker stack. 
-    build:
-      context: ./api
-      args:
-        - api_port=${API_PORT}
-    image: ghcr.io/dnclain/parcellaire-api:latest
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
