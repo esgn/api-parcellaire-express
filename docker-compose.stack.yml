@@ -13,13 +13,12 @@ version: "3.8"
 
 services:
   parcellaire-importer:
-    image: ${STACK_IMAGE_IMPORTER}
     volumes:
       #- importer-data:/tmp
       - /data/parcellaire/importer:/tmp
     networks:
       - traefik-public      
-    command: /bin/bash /scripts/cmd.sh
+    command: /bin/bash /scripts/keepalive.sh
 
   parcellaire-postgis:
     image: ${STACK_IMAGE_POSTGIS}
@@ -34,7 +33,6 @@ services:
       - /data/parcellaire/postgresql:/var/lib/postgresql/data
 
   parcellaire-api:
-    image: ${STACK_IMAGE_API}
     #ports:
       #- "${API_PORT}:${API_PORT}"
     networks:
@@ -47,7 +45,7 @@ services:
       - "traefik.frontend.entryPoints=http,https"
       - "traefik.docker.network=traefik-public"
 
-# Activate this if you want to use volume instead of binded directories.
+# Uncomment this if you want to use volume instead of binded directories.
 #volumes:
 #  parcellaire-postgis-data:
 #    name: parcellaire-postgis-data

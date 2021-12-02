@@ -19,6 +19,7 @@ version: "3.8"
 
 services:
   parcellaire-importer:
+    image: ${STACK_IMAGE_IMPORTER:-parcellaire-importer}
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
@@ -29,22 +30,14 @@ services:
       - DOWNLOAD_URL
       - TEST_IMPORTER
       - MAX_PARALLEL_DL
-    # volumes:
-      #- importer-data:/tmp
-      #- /data/parcellaire/importer:/tmp
 
   parcellaire-postgis:
+    image: ${STACK_IMAGE_API:-topo-postgis:latest}
     environment:
       - POSTGRES_DB
       - POSTGRES_PORT
       - POSTGRES_USER
       - POSTGRES_PASSWORD
-    # Exposition du port de la base de données pour test si nécessaire
-    #ports:
-    #  - "${POSTGRES_PORT}:${POSTGRES_PORT}"    
-    #volumes:
-      #- parcellaire-postgis-data:/var/lib/postgresql/data
-      #- /data/parcellaire/postgresql:/var/lib/postgresql/data
     # Options de configuration issues de PGTune (https://pgtune.leopard.in.ua)
     # Valeurs par défaut pour une instance Hetzner CPX21
     command:
@@ -91,17 +84,8 @@ services:
       retries: 5
       start_period: 10s
 
-  # Frontal web pour exploration de la base si nécessaire
-  # parcellaire-adminer:
-  #     container_name: parcellaire-express-adminer
-  #     image: adminer:4.8.1
-  #     ports:
-  #         - "8080:8080"
-  #     environment:
-  #        - ADMINER_DEFAULT_SERVER=${DB_HOST}
-  #        - ADMINER_DESIGN=hydra
-
   parcellaire-api:
+    image: ${STACK_IMAGE_API:-topo-api:latest}  
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
@@ -112,9 +96,7 @@ services:
       - API_PORT
       - API_KEY
       - MAX_FEATURE
-      - VIEWER_URL
-    ports:
-      - "${API_PORT}:${API_PORT}"   
+      - VIEWER_URL 
     healthcheck:
       test:
         [

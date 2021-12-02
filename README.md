@@ -50,11 +50,18 @@ Il est possible de décommenter le service `adminer` dans `docker-compose.yml` p
 
     `docker-compose build`
 
-2. Lancement des containers via docker-compose
+2. Eventuellement, pusher les images vers un registry (pour une potentielle mise en production)
+
+    ```bash
+    docker login <registry>
+    docker-compose push
+    ```
+
+3. Lancement des containers via docker-compose
 
     `docker-compose up -d`
 
-3. Import des données en base (opérations longues pouvant être lancées dans un `screen` ou en utilisant l'option `-d` de `docker-compose run`)
+4. Import des données en base (opérations longues pouvant être lancées dans un `screen` ou en utilisant l'option `-d` de `docker-compose run`)
 
    * Téléchargement des données du produit :
 
@@ -64,29 +71,9 @@ Il est possible de décommenter le service `adminer` dans `docker-compose.yml` p
 
       `docker-compose run parcellaire-importer bash /tmp/import-data.sh`
 
-## Stack and traefik
+## Environnement de production Stack/traefik
 
 Ces commandes s'appliquent pour un déploiement en production avec docker stack et traefik :
-
-0. Builder chaque image et les déployer vers une registry (Github/Gitlab/...)
-    
-    ```bash
-    # Login 
-    # S'assurer que la clé permet le push d'image.
-    docker login <registry_url>
-    # API
-    cd api
-    docker build . -t <registry_url>/<username>/parcellaire-api:latest
-    docker push <registry_url>/username/parcellaire-api:latest
-    # POSTGRES
-    cd ../postgis
-    docker build . -t <registry_url>/<username>/parcellaire-postgis:latest
-    docker push <registry_url>/username/parcellaire-postgis:latest
-    # IMPORTER
-    cd ../importer
-    docker build . -t <registry_url>/<username>/parcellaire-importer:latest
-    docker push <registry_url>/username/parcellaire-importer:latest
-    ```
 
 1. Installer `docker-compose` en suivant les instructions de la [documentation](https://docs.docker.com/compose/install/)
 
