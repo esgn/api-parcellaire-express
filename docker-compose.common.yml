@@ -32,7 +32,7 @@ services:
       - MAX_PARALLEL_DL
 
   parcellaire-postgis:
-    image: ${STACK_IMAGE_API:-topo-postgis:latest}
+    image: ${STACK_IMAGE_POSTGIS:-topo-postgis:latest}
     environment:
       - POSTGRES_DB
       - POSTGRES_PORT

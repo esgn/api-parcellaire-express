@@ -21,7 +21,6 @@ services:
     command: /bin/bash /scripts/keepalive.sh
 
   parcellaire-postgis:
-    image: ${STACK_IMAGE_POSTGIS}
     # Exposition du port de la base de données pour test si nécessaire
     #ports:
     #  - "${POSTGRES_PORT}:${POSTGRES_PORT}"
