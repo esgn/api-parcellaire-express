@@ -135,6 +135,12 @@ Ces commandes s'appliquent pour un déploiement en production avec docker stack 
 * **GET** `/parcelle?bbox={bbox}` *ou* `/parcelle?lon_min={lon}&lat_min={lat}&lon_max={lon}&lat_max={lat}` : Recherche des parcelles intersectant une bounding box donnée en coordonnées géographiques (WGS84)
   * Exemple : http://localhost:8010/parcelle?bbox=5.2135,44.5719,5.2709,44.6247
 
+⭐️ Quand l'api est protégé par une clé d'api, merci d'ajouter à la requête le header suivant :
+    
+    `Authorization: Bearer <api_key>`
+    OR
+    `Authorization: Token <api_key>`
+
 ### Formats
 
 #### Paramètres
