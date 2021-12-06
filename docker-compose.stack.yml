@@ -39,11 +39,12 @@ services:
     deploy:
       labels:
       - "traefik.enable=true"
-      - "traefik.port=${API_PORT}"
-      - "traefik.http.services.parcellaire.loadbalancer.server.port=${API_PORT}"
-      - "traefik.frontend.rule=Host:${STACK_FRONTEND_DNS}"
-      - "traefik.frontend.entryPoints=http,https"
       - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.topo.rule=Host(`${STACK_FRONTEND_DNS}`)"
+      - "traefik.http.routers.topo.entrypoints=websecure"
+      - "traefik.http.services.topo.loadbalancer.server.port=${API_PORT}"
+      - "traefik.http.routers.topo.tls.certresolver=le"       
+      
 
 # Uncomment this if you want to use volume instead of binded directories.
 #volumes:
