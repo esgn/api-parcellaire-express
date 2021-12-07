@@ -28,6 +28,8 @@ Il est possible de décommenter le service `adminer` dans `docker-compose.yml` p
 
 ## Préalables
 
+0. 🚨 Copier le fichier `.env.example` vers le fichier `.env` avant toute opération. Les valeurs par défauts devraient être suffisantes, mais il vous est possible de l'adapter à votre environnement.
+
 1. Le fichier `.env` regroupe l'ensemble des valeurs de configuration. On liste ci-dessous les options les plus utiles :
     * Configuration de l'importer
       * `MAX_PARALLEL_DL` : Nombre de téléchargement d'archives de données simultanés. Fixé à `4` par défaut.
@@ -36,7 +38,10 @@ Il est possible de décommenter le service `adminer` dans `docker-compose.yml` p
       * `POSTGRES_PASSWORD` :  Mot de passe de la base de données. **A modifier**.
     * Configuration de l'API
       * `API_PORT` : Port d'écoute de l'API. Fixé à `8010` par défaut.
-      * `MAX_FEATURE` : Nombre maximal d'objets retournés par l'API. Fixé à `1000` par défaut.
+      * `MAX_FEATURE` : Nombre maximal d'objets retournés par l'API. Fixé à `1000` par défaut. `0` pour désactiver la limite.
+      * `API_KEY` : (Optionnel) Bearer Authentication. Laisser vide ou non défini pour désactiver.
+    * Configuration du viewer
+      * `VIEWER_URL` : (Optionnel) Url d'accès à une page de consultation des parcelles. Laisser vide ou non défini pour désactiver.
 2. Des options de configuration de PostgreSQL sont définies dans le fichier `docker-compose.yml`. Utiliser [PGTune](https://pgtune.leopard.in.ua/#/) pour les adapter aux caractéristiques de la machine hôte.
 
 ## Déploiement
@@ -45,11 +50,18 @@ Il est possible de décommenter le service `adminer` dans `docker-compose.yml` p
 
     `docker-compose build`
 
-2. Lancement des containers via docker-compose
+2. Eventuellement, pusher les images vers un registry (pour une potentielle mise en production)
+
+    ```bash
+    docker login <registry>
+    docker-compose push
+    ```
+
+3. Lancement des containers via docker-compose
 
     `docker-compose up -d`
 
-3. Import des données en base (opérations longues pouvant être lancées dans un `screen` ou en utilisant l'option `-d` de `docker-compose run`)
+4. Import des données en base (opérations longues pouvant être lancées dans un `screen` ou en utilisant l'option `-d` de `docker-compose run`)
 
    * Téléchargement des données du produit :
 
@@ -58,6 +70,58 @@ Il est possible de décommenter le service `adminer` dans `docker-compose.yml` p
    * Mise en base des données du produit :
 
       `docker-compose run parcellaire-importer bash /tmp/import-data.sh`
+
+## Environnement de production Stack/traefik
+
+Ces commandes s'appliquent pour un déploiement en production avec docker stack et traefik :
+
+1. Installer `docker-compose` en suivant les instructions de la [documentation](https://docs.docker.com/compose/install/)
+
+2. Compléter le fichier [`.env`] avec les informations de la production, notamment le chemin des images et le nom du réseau traefik.
+
+    - `STACK_FRONTEND_DNS` : Par exemple `ign-parcellaire.yoursite.org`. S'assurer que l'entrée DNS existe AVANT le déploiement.
+    - `STACK_IMAGE_IMPORTER` : Par exemple `ghcrio.io/esgn/parcellaire-importer:latest`
+    - `STACK_IMAGE_API` : Par exemple `ghcrio.io/esgn/parcellaire-importer:latest`
+    - `STACK_IMAGE_POSTGIS` : Par exmeple `ghcrio.io/esgn/parcellaire-postgis:latest`
+
+3. Extraire la version avec les valeurs du fichier [`.env`]
+
+    `docker-compose -f docker-compose.common.yml -f docker-compose.stack > docker-stack.yml config`
+
+    Modifier le nom du réseau qui correspond à votre environnement directement dans  `docker-stack.yml`.
+
+4. S'authentifier si nécessaire avec un clé qui les droits de pull 
+
+    `docker login <registry_url>`
+
+5. Lancement
+
+    ```bash
+    # Deploy
+    docker stack deploy parcellaire --with-registry-auth
+    # Check 
+    docker stack ps --no-trunc
+    # Service reference 
+    docker service ls
+    ```
+
+6. Installation
+
+    Même procédure que pour `docker-compose` :
+    
+   * Téléchargement des données du produit :
+
+      `docker exec parcellaire_parcellaire-importer.XXXXX python3 /tmp/download-dataset.py`
+
+   * Mise en base des données du produit :
+
+      `docker exec pacellaire_parcellaire-importer.XXXXX /bin/bash /tmp/import-data.sh`
+   
+   * Enjoy !
+
+7. Arrêt
+
+    `docker stack rm parcellaire`
 
 
 ## Utilisation
@@ -70,6 +134,12 @@ Il est possible de décommenter le service `adminer` dans `docker-compose.yml` p
   * Exemple : http://localhost:8010/parcelle?pos=5.2709,44.6247
 * **GET** `/parcelle?bbox={bbox}` *ou* `/parcelle?lon_min={lon}&lat_min={lat}&lon_max={lon}&lat_max={lat}` : Recherche des parcelles intersectant une bounding box donnée en coordonnées géographiques (WGS84)
   * Exemple : http://localhost:8010/parcelle?bbox=5.2135,44.5719,5.2709,44.6247
+
+⭐️ Quand l'api est protégé par une clé d'api, merci d'ajouter à la requête le header suivant :
+    
+    `Authorization: Bearer <api_key>`
+    OR
+    `Authorization: Token <api_key>`
 
 ### Formats
 

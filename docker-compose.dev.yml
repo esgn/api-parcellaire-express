@@ -1,0 +1,61 @@
+version: "3.8"
+
+#####
+# ⭐️ This file is not independent :
+## 🟢 Docker-compose DEV mode, starts with
+# $ docker-compose -f docker-compose.common.yml -f docker-compose.dev.yml [build|up -d|down] 
+# OR
+# $ docker-compose docker-compose.common.yml -f docker-compose.dev.yml config > docker-compose.yml
+# $ docker-compose [build|up -d|down]
+#####
+
+# 🪧 Some information on this file : 
+# See : https://docs.docker.com/compose/compose-file/compose-file-v3/
+
+services:
+  parcellaire-importer:
+    container_name: parcellaire-express-importer
+    build:
+      context: ./importer  
+    volumes:
+      - importer-data:/tmp
+
+  parcellaire-postgis:
+    container_name: parcellaire-express-postgis
+    build:
+      context: ./postgis
+      args:
+        - POSTGRES_VERSION
+        - POSTGIS_VERSION
+    # Exposition du port de la base de données pour test si nécessaire
+    #ports:
+    #  - "${POSTGRES_PORT}:${POSTGRES_PORT}"    
+    shm_size: 2g
+    volumes:
+      - parcellaire-postgis-data:/var/lib/postgresql/data
+  
+  parcellaire-api:
+    container_name: parcellaire-express-api
+    # build command is ignored on docker stack. 
+    build:
+      context: ./api
+      args:
+        - api_port=${API_PORT}
+    ports:
+      - "${API_PORT}:${API_PORT}"  
+
+  # Frontal web pour exploration de la base si nécessaire
+  # parcellaire-adminer:
+  #     container_name: parcellaire-express-adminer
+  #     image: adminer:4.8.1
+  #     ports:
+  #         - "8080:8080"
+  #     environment:
+  #        - ADMINER_DEFAULT_SERVER=${DB_HOST}
+  #        - ADMINER_DESIGN=hydra
+
+volumes:
+  parcellaire-postgis-data:
+    name: parcellaire-postgis-data
+  importer-data:
+    name: importer-data

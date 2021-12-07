@@ -1,0 +1,6 @@
+*.swp
+.env
+.DS_Store
+# Local configuration
+docker-compose.yml
+docker-stack.yml

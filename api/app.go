@@ -32,18 +32,9 @@ type App struct {
 	DB     *sql.DB
 }
 
-func (a *App) Initialize(user, password, dbname, hostname string) {
+func (a *App) Initialize(DB *sql.DB) {
 
-	log.SetOutput(os.Stderr)
-
-	connectionString :=
-		fmt.Sprintf("user=%s password=%s dbname=%s host=%s sslmode=disable", user, password, dbname, hostname)
-
-	var err error
-	a.DB, err = sql.Open("postgres", connectionString)
-	if err != nil {
-		log.Fatal(err)
-	}
+	a.DB = DB
 
 	a.Router = mux.NewRouter()
 	a.initializeRoutes()
@@ -54,15 +45,24 @@ func (a *App) Run(addr string) {
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	response, err := json.Marshal(payload)
-	if err != nil {
-		log.Println("JSON marshalling error")
-	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	if _, err := w.Write(response); err != nil {
-		log.Println("Could not send response")
+
+	_err := json.NewEncoder(w).Encode(payload)
+	if _err != nil {
+		log.Printf("🚧 JSON encoding error : %v\n", _err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+
+		_err = json.NewEncoder(w).Encode(GeneralMessage{
+			Message: "jsonEncodingError",
+			Error:   true,
+			Literal: "Sorry, cannot output to json",
+		})
+
+		log.Panicf("🚨 Cannot output error message : %v\n", _err)
 	}
+
 }
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
@@ -125,27 +125,48 @@ func (a App) healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) initializeRoutes() {
-	a.Router.HandleFunc("/parcelle/{idu:"+iduRegex+"}", a.getById).Methods("GET")
 
-	a.Router.HandleFunc("/parcelle", a.findByPosition).Queries(
+	theViewerUrl, isViewerUrldefined := os.LookupEnv("VIEWER_URL")
+	if isViewerUrldefined {
+		log.Printf("⭐️ Html viewer is enabled : %v", isViewerUrldefined)
+		// silent viewer route
+		a.Router.PathPrefix(theViewerUrl).Handler(http.StripPrefix(theViewerUrl, http.FileServer(http.Dir("./views")))).Methods("GET")
+	}
+
+	// silent route
+	a.Router.HandleFunc("/status", a.healthCheckHandler).Methods("GET")
+
+	_mayBeSecured := a.Router.NewRoute().Subrouter()
+
+	_mayBeSecured.Use(LogMw)
+
+	if os.Getenv(ENV_API_KEY) != "" {
+		log.Printf("⭐️ Api key security is enabled")
+		_mayBeSecured.Use(AuthMw)
+	}
+
+	_mayBeSecured.HandleFunc("/parcelle/{idu:"+iduRegex+"}", a.getById).Methods("GET")
+
+	_mayBeSecured.HandleFunc("/parcelle", a.findByPosition).Queries(
 		"pos", "{pos:"+posRegex+"}").Methods("GET")
 
-	a.Router.HandleFunc("/parcelle", a.findByPositionSplit).Queries(
+	_mayBeSecured.HandleFunc("/parcelle", a.findByPositionSplit).Queries(
 		"lon", "{lon:"+lonRegex+"}",
 		"lat", "{lat:"+latRegex+"}").Methods("GET")
 
-	a.Router.HandleFunc("/parcelle", a.findByBbox).Queries(
+	_mayBeSecured.HandleFunc("/parcelle", a.findByBbox).Queries(
 		"bbox", "{bbox:"+bboxRegex+"}").Methods("GET")
 
-	a.Router.HandleFunc("/parcelle", a.findByBboxSplit).Queries(
+	_mayBeSecured.HandleFunc("/parcelle", a.findByBboxSplit).Queries(
 		"lon_min", "{lon_min:"+lonRegex+"}",
 		"lat_min", "{lat_min:"+latRegex+"}",
 		"lon_max", "{lon_max:"+lonRegex+"}",
 		"lat_max", "{lat_max:"+latRegex+"}").Methods("GET")
 
-	a.Router.HandleFunc("/parcelle", a.error(http.StatusBadRequest, "Requête invalide"))
+	// handle no argument
+	a.Router.Handle("/parcelle", Use(LogMw).ThenFunc(a.error(http.StatusBadRequest, "Requête invalide")))
 
-	a.Router.HandleFunc("/status", a.healthCheckHandler).Methods("GET")
+	// handle root path
+	a.Router.PathPrefix("/").Handler(Use(LogMw).ThenFunc(a.error(http.StatusNotFound, "URL inconnue")))
 
-	a.Router.PathPrefix("/").HandlerFunc(a.error(http.StatusNotFound, "URL inconnue"))
 }

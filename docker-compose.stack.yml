@@ -1,0 +1,59 @@
+version: "3.8"
+
+#####
+# ⭐️ This file is not independent :
+## 🟢 Docker-compose STACK mode, starts with
+# docker login <registry_url>
+# docker-compose -f docker-compose.common.yml -f docker-compose.stack.yml config > docker-stack.yml
+# docker stack deploy parcellaire -c docker-stack.yml --with-registry-auth
+#####
+
+# 🪧 Some information on this file : 
+# See : https://docs.docker.com/compose/compose-file/compose-file-v3/
+
+services:
+  parcellaire-importer:
+    volumes:
+      #- importer-data:/tmp
+      - /data/parcellaire/importer:/tmp
+    networks:
+      - traefik-public      
+    command: /bin/bash /scripts/keepalive.sh
+
+  parcellaire-postgis:
+    # Exposition du port de la base de données pour test si nécessaire
+    #ports:
+    #  - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    networks:
+      - traefik-public      
+    volumes:
+      #- parcellaire-postgis-data:/var/lib/postgresql/data
+      # 🚨 Please change the owner of /data/parcellaire/postgresql to 999:999 first.
+      - /data/parcellaire/postgresql:/var/lib/postgresql/data
+
+  parcellaire-api:
+    #ports:
+      #- "${API_PORT}:${API_PORT}"
+    networks:
+      - traefik-public
+    deploy:
+      labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.parcellaire.rule=Host(`${STACK_FRONTEND_DNS}`)"
+      - "traefik.http.routers.parcellaire.entrypoints=websecure"
+      - "traefik.http.services.parcellaire.loadbalancer.server.port=${API_PORT}"
+      - "traefik.http.routers.parcellaire.tls.certresolver=le"     
+      
+
+# Uncomment this if you want to use volume instead of binded directories.
+#volumes:
+#  parcellaire-postgis-data:
+#    name: parcellaire-postgis-data
+#  importer-data:
+#    name: importer-data
+
+networks:
+  traefik-public:
+    external: true
+    name: traefik-public
