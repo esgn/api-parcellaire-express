@@ -1,121 +1,130 @@
-version: '3.8'
+version: "3.8"
 
 services:
+  parcellaire-importer:
+    container_name: parcellaire-express-importer
+    build:
+      context: ./importer
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+      - POSTGRES_SCHEMA
+      - DOWNLOAD_URL
+      - TEST_IMPORTER
+      - MAX_PARALLEL_DL
+    volumes:
+      - importer-data:/tmp
 
-    parcellaire-importer:
-        container_name: parcellaire-express-importer
-        build:
-            context: ./importer
-        environment:
-            - POSTGRES_USER
-            - POSTGRES_PASSWORD
-            - POSTGRES_DB
-            - POSTGRES_HOST
-            - POSTGRES_SCHEMA
-            - DOWNLOAD_URL
-            - TEST_IMPORTER
-            - MAX_PARALLEL_DL
-        volumes:
-            - importer-data:/tmp
+  parcellaire-postgis:
+    container_name: parcellaire-express-postgis
+    build:
+      context: ./postgis
+      args:
+        - POSTGRES_VERSION
+        - POSTGIS_VERSION
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_PORT
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      # Exposition du port de la base de données pour test si nécessaire
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - parcellaire-postgis-data:/var/lib/postgresql/data
+    # Options de configuration issues de PGTune (https://pgtune.leopard.in.ua)
+    # Valeurs par défaut pour une instance Hetzner CPX21
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=100"
+      - "-c"
+      - "shared_buffers=1GB"
+      - "-c"
+      - "effective_cache_size=3GB"
+      - "-c"
+      - "maintenance_work_mem=256MB"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      - "-c"
+      - "wal_buffers=16MB"
+      - "-c"
+      - "default_statistics_target=100"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "effective_io_concurrency=200"
+      - "-c"
+      - "work_mem=2621kB"
+      - "-c"
+      - "min_wal_size=1GB"
+      - "-c"
+      - "max_wal_size=4GB"
+      - "-c"
+      - "max_worker_processes=4"
+      - "-c"
+      - "max_parallel_workers_per_gather=2"
+      - "-c"
+      - "max_parallel_workers=4"
+      - "-c"
+      - "max_parallel_maintenance_workers=2"
+      # Pour logguer l'intégralité des requêtes effectuées sur la base
+      # - "-c"
+      # - "log_statement=all"
+    shm_size: 2g
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 1m
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
-    parcellaire-postgis:
-        container_name: parcellaire-express-postgis
-        build:
-            context: ./postgis
-            args:
-                - POSTGRES_VERSION
-                - POSTGIS_VERSION
-        environment:
-            - POSTGRES_DB
-            - POSTGRES_USER
-            - POSTGRES_PASSWORD
-        # Exposition du port de la base de données pour test si nécessaire
-        # ports:
-            # - "5432:5432"
-        volumes:
-            - parcellaire-postgis-data:/var/lib/postgresql/data
-        # Options de configuration issues de PGTune (https://pgtune.leopard.in.ua)
-        # Valeurs par défaut pour une instance Hetzner CPX21
-        command:
-            - "postgres"
-            - "-c"
-            - "max_connections=100"
-            - "-c"
-            - "shared_buffers=1GB"
-            - "-c"
-            - "effective_cache_size=3GB"
-            - "-c"
-            - "maintenance_work_mem=256MB"
-            - "-c"
-            - "checkpoint_completion_target=0.9"
-            - "-c"
-            - "wal_buffers=16MB"
-            - "-c"
-            - "default_statistics_target=100"
-            - "-c"
-            - "random_page_cost=1.1"
-            - "-c"
-            - "effective_io_concurrency=200"
-            - "-c"
-            - "work_mem=2621kB"
-            - "-c"
-            - "min_wal_size=1GB"
-            - "-c"
-            - "max_wal_size=4GB"
-            - "-c"
-            - "max_worker_processes=4"
-            - "-c"
-            - "max_parallel_workers_per_gather=2"
-            - "-c"
-            - "max_parallel_workers=4"
-            - "-c"
-            - "max_parallel_maintenance_workers=2"
-            # Pour logguer l'intégralité des requêtes effectuées sur la base
-            # - "-c"
-            # - "log_statement=all"
-        shm_size: 2g
-        healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
-            interval: 1m
-            timeout: 5s
-            retries: 5
-            start_period: 10s
+  # Frontal web pour exploration de la base si nécessaire
+  # parcellaire-adminer:
+  #     container_name: parcellaire-express-adminer
+  #     image: adminer:4.8.1
+  #     ports:
+  #         - "8080:8080"
+  #     environment:
+  #        - ADMINER_DEFAULT_SERVER=${DB_HOST}
+  #        - ADMINER_DESIGN=hydra
 
-    # Frontal web pour exploration de la base si nécessaire
-    # parcellaire-adminer:
-    #     container_name: parcellaire-express-adminer
-    #     image: adminer:4.8.1
-    #     ports:
-    #         - "8080:8080"
-    #     environment: 
-    #        - ADMINER_DEFAULT_SERVER=${DB_HOST}
-    #        - ADMINER_DESIGN=hydra
-
-    parcellaire-api:
-        container_name: parcellaire-express-api
-        build:
-            context: ./api
-            args:
-                - api_port=${API_PORT}
-        environment:
-            - POSTGRES_USER
-            - POSTGRES_PASSWORD
-            - POSTGRES_DB
-            - POSTGRES_HOST
-            - POSTGRES_SCHEMA
-            - API_PORT
-            - MAX_FEATURE
-        ports:
-            - "${API_PORT}:${API_PORT}"
-        healthcheck:
-            test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:${API_PORT}/status || exit 1"]
-            interval: 1m
-            timeout: 5s
-            retries: 5
-            start_period: 10s
+  parcellaire-api:
+    container_name: parcellaire-express-api
+    build:
+      context: ./api
+      args:
+        - api_port=${API_PORT}
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+      - POSTGRES_SCHEMA
+      - API_PORT
+      - API_KEY
+      - MAX_FEATURE
+      - LIMIT_FEATURE
+      - VIEWER_URL
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:${API_PORT}/status || exit 1",
+        ]
+      interval: 1m
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
-    parcellaire-postgis-data:
-        name: parcellaire-postgis-data
-    importer-data:
-        name: importer-data
+  parcellaire-postgis-data:
+    name: parcellaire-postgis-data
+  importer-data:
+    name: importer-data
