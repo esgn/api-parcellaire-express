@@ -14,3 +14,9 @@ const (
 	ENV_POSTGRES_SCHEMA   = "POSTGRES_SCHEMA"
 	ENV_MAX_FEATURE       = "MAX_FEATURE"
 )
+
+///
+// Optional env vars
+///
+
+const ENV_VIEWER_URL = "VIEWER_URL"
