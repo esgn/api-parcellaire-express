@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Export des variables d'environnement pour psql
+# Export des variables d'environnement pour la commande psql
 export PGUSER=$POSTGRES_USER
 export PGDATABASE=$POSTGRES_DB
 export PGPASSWORD=$POSTGRES_PASSWORD
@@ -35,6 +35,7 @@ for f in *.7z; do
     7z x $f
     xdir=`basename $f .7z`
     cd "$(find $xdir -name "PARCELLE.SHP" -printf '%h' -quit)"
+    # Utilisation du flag -D (Use postgresql dump format) pour de meilleures performances d'import
     shp2pgsql -s $src_epsg:$dst_epsg -D $append PARCELLE.SHP $POSTGRES_SCHEMA.parcelle | psql
     cd /tmp/parcellaire-express/
     # Suppression du dossier d'extraction

@@ -26,6 +26,7 @@ def download_url(url):
                 for data in r.iter_content(chunk_size=8192):
                     f.write(data)
     except requests.exceptions.HTTPError as err:
+        # TODO : Retry en cas d'échec d'un téléchargement.
         print(filename + " teléchargement échoué")
         print(err)
         sys.exit(0)
@@ -46,10 +47,10 @@ if __name__ == "__main__":
 
     # Utilisation d'un autre maximum de téléchargements en parallèle que celui par défaut
     if "MAX_PARALLEL_DL" in os.environ:
-        if int(os.environ['MAX_PARALLEL_DL'])!=0:
+        if int(os.environ['MAX_PARALLEL_DL'])>0:
             max_parallel_dl = int(os.environ['MAX_PARALLEL_DL'])
         else:
-            print("🚧 new value of MAX_PARALLEL_DL is not in integer. Ignored.", file=sys.stderr)
+            print("🚧 La valeur de MAX_PARALLEL_DL fournie sera ignorée car elle est négative ou nulle.", file=sys.stderr)
 
     # Extraction des liens de téléchargement
     all_links = extract_all_links(idx_url)
@@ -58,11 +59,11 @@ if __name__ == "__main__":
 
     # Pour un simple test on se limite à une seule archive
     if "TEST_IMPORTER" in os.environ:
-        if int(os.environ['TEST_IMPORTER'])!=0:
+        if int(os.environ['TEST_IMPORTER'])==1:
             testing=True
             all_links = all_links[:1]
         else:
-            print("🚧 new value of TEST_IMPORTER is not in integer. Ignored.", file=sys.stderr)
+            print("🚧 La valeur de TEST_IMPORTER fournie est différente de 1 => Execution en mode nominal.", file=sys.stderr)
 
     # Réinitialisation du dossier de téléchargement
     if os.path.exists(out_dir):
@@ -70,11 +71,12 @@ if __name__ == "__main__":
     os.mkdir(out_dir)
 
     # Téléchargement des archives en parallèle
-    print("Début du téléchargement du Parcellaire Express")
+    print("Début du téléchargement du produit Parcellaire Express")
     print("URL source : " + idx_url)
     print("Nombre de téléchargements en parallèle : " + str(max_parallel_dl))
     if testing:
-        print("🟣 EXECUTION EN MODE TEST => UNE SEULE ARCHIVE SERA TELECHARGEE")
+        print("🟣 Execution en mode test => Une seule archive sera téléchargée.")
+    # TODO : Mettre en place une progress bar
     results = ThreadPool(max_parallel_dl).imap_unordered(download_url, all_links)
     for r in results:
         print(r)
