@@ -94,14 +94,14 @@ func initDB(user, password, dbname, hostname, port string) *sql.DB {
 }
 
 func main() {
-	// I choosed to initiliazed DB outside the app
+	// DB initialized outside the app
 	// because of the global nature of the connection pool (check DB.Close() comment)
 	DB := initDB(os.Getenv(ENV_POSTGRES_USER),
 		os.Getenv(ENV_POSTGRES_PASSWORD),
 		os.Getenv(ENV_POSTGRES_DB),
 		os.Getenv(ENV_POSTGRES_HOST),
 		os.Getenv(ENV_POSTGRES_PORT))
-	// not really necessary, but maniac decision [💩]
+	// not really necessary, but does not hurt
 	defer DB.Close()
 
 	a := App{}

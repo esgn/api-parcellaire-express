@@ -42,7 +42,6 @@ func getGeoJSON(db *sql.DB, query string, args ...interface{}) (*geojson.Feature
 		}
 		f := geojson.NewFeature(a.geometry)
 
-		// 🥲 why no ternary operator OR 'if expression' in go, snif 🥲
 		// idu
 		if a.idu.Valid {
 			_val, _ := a.idu.Value()
