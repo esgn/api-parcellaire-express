@@ -29,19 +29,42 @@
       const baseUrl = `${window.location.protocol}//${window.location.host}`;
       var reqControl = undefined;
 
+      // base layers
+      var osm = L.tileLayer("https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+      });
+      var planignv2 = L.tileLayer(
+        "https://wxs.ign.fr/essentiels/geoportail/wmts?" +
+        "&REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0" +
+        "&STYLE=normal" +
+        "&TILEMATRIXSET=PM" +
+        "&FORMAT=image/png" +
+        "&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2" +
+        "&TILEMATRIX={z}" +
+        "&TILEROW={y}" +
+        "&TILECOL={x}",
+        {
+            minZoom: 0,
+            maxZoom: 19,
+            attribution: '<a href="https://www.ign.fr/">IGN-F</a>/<a href="https://www.geoportail.gouv.fr/">Geoportail</a>',
+            tileSize: 256
+        }
+      );
+      var baseMaps = {
+        "OSM": osm,
+        "Plan IGN V2": planignv2
+      };
+    
       // PARIS
       const map = L.map("map", {
         center: [48.8592, 2.3427],
         zoom: 13,
+        layers: [planignv2]
       });
 
+      L.control.layers(baseMaps).addTo(map);
       var layerGroup = L.layerGroup().addTo(map);
-      var layerSiteGroup = L.layerGroup().addTo(map);
-
-      L.tileLayer("https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png", {
-        attribution:
-          '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-      }).addTo(map);
 
       var currentListOfBuildings = [];
 
@@ -73,7 +96,7 @@
           })
             .then((e) => e.json())
             .then((data) => {
-              console.log("✅ - parcels recieved");
+              console.log("✅ - parcels received");
               currentListOfBuildings = [];
               data.features.forEach((feature) => {
                 if (feature.geometry.type === "MultiPolygon") {
