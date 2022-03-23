@@ -20,22 +20,23 @@ services:
 
   parcellaire-postgis:
     container_name: parcellaire-express-postgis
-    # Utilisation d'une image avec tuning automatique
+    # Utilisation d'une image avec tuning inclus (https://github.com/esgn/pgtuned)
     image: esgn/pgtuned:postgis-latest
     environment:
+      # Option de base 
       - POSTGRES_DB
       - POSTGRES_PORT
       - POSTGRES_USER
       - POSTGRES_PASSWORD
-      # Options pour tuning via esgn/pgtuned
+      # Options pour tuning de postgres
       # - DB_TYPE=mixed
       - STGE_TYPE=ssd
       # - TOTAL_MEM=8GB
       # - CPU_COUNT=8
       # - MAX_CONN=1000
     # Exposition du port de la base de données pour test si nécessaire
-    ports:
-      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    # ports:
+    #   - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
       - parcellaire-postgis-data:/var/lib/postgresql/data
     shm_size: 2g
@@ -46,7 +47,7 @@ services:
       retries: 5
       start_period: 10s
 
-  # Frontal web pour exploration de la base si nécessaire
+  # Frontal web pour exploration de la base si nécessaire (https://www.adminer.org/)
   # parcellaire-adminer:
   #     container_name: parcellaire-express-adminer
   #     image: adminer:4.8.1

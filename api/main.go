@@ -12,7 +12,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// init checks configuration at module initialization.
+// init vérifie la présence d'un fichier de configuration à l'initialisation
 func init() {
 	flagUseEnv := flag.String("env", "", "Provides the path to .env files")
 
@@ -30,9 +30,9 @@ func init() {
 	checkEnv()
 }
 
-// checkEnv ensures all necessary env data is present.
-// panic in case of missing env.
-// hide env vars with 'password', 'passwd' or 'key' in their name.
+// checkEnv s'assure que l'ensemble des variables d'environnement nécessaires sont présentes
+// Exit en cas de variables manquantes.
+// Anonymise les variables avec 'password', 'passwd' ou 'key' dans leurs noms.
 func checkEnv() {
 	mandatoryEnvs := []string{
 		ENV_POSTGRES_USER, ENV_POSTGRES_PASSWORD, ENV_POSTGRES_DB,
@@ -68,7 +68,7 @@ func checkEnv() {
 		fmt.Printf("# %s : %s \n", theEnvName, theEnv)
 	}
 
-	// checks the format
+	// Vérifie le format des paramètres
 	// TODO: replace by a more clever code.
 	_maxFeatureRaw := os.Getenv(ENV_MAX_FEATURE)
 	_maxFeature, err := strconv.Atoi(_maxFeatureRaw)
@@ -80,7 +80,7 @@ func checkEnv() {
 	}
 }
 
-// initDB creates a global connection pool from identifiers.
+// initDB créee un pool de connection global
 func initDB(user, password, dbname, hostname, port string) *sql.DB {
 	connectionString :=
 		fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable", user, password, dbname, hostname, port)
@@ -95,7 +95,7 @@ func initDB(user, password, dbname, hostname, port string) *sql.DB {
 
 func main() {
 	// DB initialized outside the app
-	// because of the global nature of the connection pool (check DB.Close() comment)
+	// because of the global nature of the connection pool
 	DB := initDB(os.Getenv(ENV_POSTGRES_USER),
 		os.Getenv(ENV_POSTGRES_PASSWORD),
 		os.Getenv(ENV_POSTGRES_DB),

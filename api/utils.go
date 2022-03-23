@@ -1,5 +1,7 @@
 package main
 
+// added by github.com/dnclain
+
 import (
 	"fmt"
 	"log"

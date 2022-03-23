@@ -1,9 +1,8 @@
 package main
 
-///
-// Mandatory env vars
-///
+// added by github.com/dnclain
 
+// Variables d'environnement obligatoires
 const (
 	ENV_POSTGRES_USER     = "POSTGRES_USER"
 	ENV_POSTGRES_PASSWORD = "POSTGRES_PASSWORD"
@@ -15,8 +14,5 @@ const (
 	ENV_MAX_FEATURE       = "MAX_FEATURE"
 )
 
-///
-// Optional env vars
-///
-
+// Variables d'environnement optionnelles
 const ENV_VIEWER_URL = "VIEWER_URL"
