@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 retry_strategy = Retry(
     total=3,
     status_forcelist=[429, 500, 502, 503, 504],
-    method_whitelist=["HEAD", "GET", "OPTIONS"]
+    allowed_methods=["HEAD", "GET", "OPTIONS"]
 )
 
 def extract_all_links_oda(url):
