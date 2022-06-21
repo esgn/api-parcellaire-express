@@ -10,6 +10,7 @@ Seules les parcelles cadastrales sont diffusées pour le moment.
 * [PostgreSQL](https://www.postgresql.org/) / [PostGIS](https://postgis.net/)
 * [Adminer](https://www.adminer.org/)
 * [Python](https://www.python.org/)
+* [pgtuned](https://github.com/esgn/pgtuned)
 
 ## Prérequis
 
