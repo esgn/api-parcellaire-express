@@ -2,4 +2,3 @@ beautifulsoup4
 requests
 tqdm
 urllib3
-urllib
