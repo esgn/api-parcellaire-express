@@ -21,7 +21,7 @@ services:
   parcellaire-postgis:
     container_name: parcellaire-express-postgis
     # Utilisation d'une image avec tuning inclus (https://github.com/esgn/pgtuned)
-    image: esgn/pgtuned:postgis-latest
+    image: esgn/pgtuned:${POSTGRES_VERSION}-${POSTGIS_VERSION}
     environment:
       # Option de base 
       - POSTGRES_DB

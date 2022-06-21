@@ -48,21 +48,21 @@ Il est possible de décommenter le service `adminer` dans `docker-compose.yml` p
 
 1. Construction des images
 
-    `docker-compose build`
+    `docker compose build`
 
 2. Lancement des containers via docker-compose
 
-    `docker-compose up -d`
+    `docker compose up -d`
 
-3. Import des données en base (opérations longues pouvant être lancées dans un `screen` ou en utilisant l'option `-d` de `docker-compose run`)
+3. Import des données en base (opérations longues pouvant être lancées dans un `screen` ou en utilisant l'option `-d` de `docker compose run`)
 
    * Téléchargement des données du produit :
 
-      `docker-compose run parcellaire-importer python3 /tmp/download-dataset.py`
+      `docker compose run parcellaire-importer python3 /tmp/download-dataset.py`
 
    * Mise en base des données du produit :
 
-      `docker-compose run parcellaire-importer bash /tmp/import-data.sh`
+      `docker compose run parcellaire-importer bash /tmp/import-data.sh`
 
 
 ## Utilisation
@@ -70,7 +70,7 @@ Il est possible de décommenter le service `adminer` dans `docker-compose.yml` p
 ### Routes
 
 * **GET** `/parcelle/{idu}` : Récupération d'une parcelle à partir de son identifiant
-  * Exemple : http://localhost:8010/parcelle/01053000BE0095
+  * Exemple : http://localhost:8010/parcelle/10100000AD0061
 * **GET** `/parcelle?pos={pos}` *ou* `/parcelle?lon={lon}&lat={lat}` : Recherche des parcelles intersectant une position donnée en coordonnées géographiques (WGS84)
   * Exemple : http://localhost:8010/parcelle?pos=5.2709,44.6247
 * **GET** `/parcelle?bbox={bbox}` *ou* `/parcelle?lon_min={lon}&lat_min={lat}&lon_max={lon}&lat_max={lat}` : Recherche des parcelles intersectant une bounding box donnée en coordonnées géographiques (WGS84)
@@ -92,8 +92,8 @@ Les résultats sont fournis au format [GeoJSON](https://geojson.org/).
 
 ## Arrêt du service
 
-* Sans suppression des données importées en base : `docker-compose down`
-* Avec suppression des données importées en base : `docker-compose down -v`
+* Sans suppression des données importées en base : `docker compose down`
+* Avec suppression des données importées en base : `docker compose down -v`
 
 ## TODO
 
