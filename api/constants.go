@@ -1,7 +1,5 @@
 package main
 
-// added by github.com/dnclain
-
 // Variables d'environnement obligatoires
 const (
 	ENV_POSTGRES_USER     = "POSTGRES_USER"

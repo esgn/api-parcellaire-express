@@ -115,7 +115,6 @@ func LogMw(next http.Handler) http.Handler {
 		next.ServeHTTP(&_w, r)
 		if _w.status >= 400 {
 			log.Println(formatLog("{} {} {} : {} > ❌ {}", r.RemoteAddr, r.Method, r.URL.String(), r.Form.Encode(), _w.status))
-
 			return
 		}
 		log.Println(formatLog("{} {} {} : {} > OK {}", r.RemoteAddr, r.Method, r.URL.String(), r.Form.Encode(), _w.status))

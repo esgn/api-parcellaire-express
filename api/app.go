@@ -111,7 +111,7 @@ func (a App) findByBboxSplit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a App) healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO : Add database status information
+	// TODO : Ajouter statut de la base de donnée
 	respondWithJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
