@@ -134,7 +134,7 @@ func (a *App) initializeRoutes() {
 	}
 
 	// silent route
-	a.Router.HandleFunc("/status", a.healthCheckHandler).Methods("GET")
+	a.Router.HandleFunc("/status", a.healthCheckHandler).Methods("GET", "OPTIONS")
 
 	_mayBeSecured := a.Router.NewRoute().Subrouter()
 
@@ -144,6 +144,8 @@ func (a *App) initializeRoutes() {
 		log.Printf("⭐️ Api key security is enabled")
 		_mayBeSecured.Use(AuthMw)
 	}
+
+	_mayBeSecured.Use(mux.MiddlewareFunc(CorsMw("GET")))
 
 	_mayBeSecured.HandleFunc("/parcelle/{idu:"+iduRegex+"}", a.getById).Methods("GET")
 

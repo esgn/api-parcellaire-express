@@ -86,7 +86,7 @@ Ces commandes s'appliquent pour un déploiement en production avec docker stack 
 
 3. Extraire la version avec les valeurs du fichier [`.env`]
 
-    `docker-compose -f docker-compose.common.yml -f docker-compose.stack > docker-stack.yml config`
+    `docker-compose -f docker-compose.common.yml -f docker-compose.stack config > docker-stack.yml`
 
     Modifier le nom du réseau qui correspond à votre environnement directement dans  `docker-stack.yml`.
 
@@ -98,9 +98,9 @@ Ces commandes s'appliquent pour un déploiement en production avec docker stack 
 
     ```bash
     # Deploy
-    docker stack deploy parcellaire --with-registry-auth
+    docker stack deploy parcellaire -c docker-stack.yml --with-registry-auth
     # Check 
-    docker stack ps --no-trunc
+    docker stack ps parcellaire --no-trunc
     # Service reference 
     docker service ls
     ```

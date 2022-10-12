@@ -183,4 +183,34 @@ func AuthMw(next http.Handler) http.Handler {
 	})
 }
 
+// CorsMw : Preflight management.
+func CorsMw(allowedMethods ...string) Middleware {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == "OPTIONS" {
+				//handle preflight in here
+
+				_headers := w.Header()
+				_headers.Add("Access-Control-Allow-Origin", "*")
+				_headers.Add("Vary", "Origin")
+				_headers.Add("Vary", "Access-Control-Request-Method")
+				_headers.Add("Vary", "Access-Control-Request-Headers")
+				_headers.Add("Access-Control-Allow-Headers", "Content-Type, Origin, Accept, token, Authorization")
+				_allowM := strings.Join(allowedMethods, ",")
+				if len(_allowM) == 0 {
+					_allowM = "OPTIONS"
+				} else {
+					_allowM += ",OPTIONS"
+				}
+				_headers.Add("Access-Control-Allow-Methods", _allowM)
+
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 // --------------------

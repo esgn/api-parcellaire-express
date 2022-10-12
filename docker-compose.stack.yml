@@ -43,8 +43,8 @@ services:
       - "traefik.http.routers.parcellaire.rule=Host(`${STACK_FRONTEND_DNS}`)"
       - "traefik.http.routers.parcellaire.entrypoints=websecure"
       - "traefik.http.services.parcellaire.loadbalancer.server.port=${API_PORT}"
-      - "traefik.http.routers.parcellaire.tls.certresolver=le"     
-      
+      - "traefik.http.routers.parcellaire.tls.certresolver=le"
+      - "traefik.http.middlewares.parcellaire.compress=true"
 
 # Uncomment this if you want to use volume instead of binded directories.
 #volumes:
