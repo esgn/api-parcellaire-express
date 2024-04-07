@@ -7,7 +7,7 @@ function import() {
     7z -bso0 -bsp0 -y x "$1" -o"$xdir"
     shp_dir="$(find "$xdir" -name "PARCELLE.SHP" -printf '%h' -quit)"
     cd "$shp_dir" || exit
-    shp2pgsql -s "$2":"$3" -D "$4" PARCELLE.SHP "$POSTGRES_SCHEMA".parcelle | psql
+    shp2pgsql -s "$2":"$3" -D $4 PARCELLE.SHP "$POSTGRES_SCHEMA".parcelle | psql
     cd "$base_dir" || exit
     rm -rf "$xdir"
     rm -rf "$1"
