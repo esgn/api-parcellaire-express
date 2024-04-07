@@ -24,7 +24,7 @@ COPY --chown=importer:importer scripts/ /tmp/
 RUN apt update && \
     apt install -y python3-pip python3 p7zip* && \
     apt install -y --no-install-recommends postgresql-client postgis
-RUN pip3 install -r /tmp/requirements.txt
+RUN pip3 install -r /tmp/requirements.txt --break-system-packages
 
 # Configuration
 WORKDIR /tmp
